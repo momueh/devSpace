@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { createFileRoute } from '@tanstack/react-router';
+import { ProjectCard } from '@/components/ProjectCard';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
@@ -32,20 +31,7 @@ function Dashboard() {
       </div>
       <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
         {projects.map((project) => (
-          <Card key={project.id} className='hover:shadow-lg transition-shadow'>
-            <CardHeader>
-              <CardTitle>{project.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <Progress value={project.progress} />
-                <div className='text-sm text-muted-foreground'>
-                  {project.tasks.completed} of {project.tasks.total} tasks
-                  completed
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
     </div>
