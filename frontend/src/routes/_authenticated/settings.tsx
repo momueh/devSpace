@@ -9,12 +9,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { userQueryOptions } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = {
   component: Settings,
 };
 
 function Settings() {
+  const { isPending, error, data } = useQuery(userQueryOptions);
+
+  if (isPending) return 'loading';
+  if (error) return 'not logged in';
+  console.log(data);
+
   return (
     <div className='space-y-6'>
       <div>

@@ -11,117 +11,177 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SettingsImport } from './routes/settings'
-import { Route as MyDevspaceImport } from './routes/my-devspace'
-import { Route as IndexImport } from './routes/index'
-import { Route as ProjectProjectIdImport } from './routes/project.$projectId'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as R404Import } from './routes/$404'
+import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSettingsImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedMyDevspaceImport } from './routes/_authenticated/my-devspace'
+import { Route as AuthenticatedProjectProjectIdImport } from './routes/_authenticated/project.$projectId'
 
 // Create/Update Routes
 
-const SettingsRoute = SettingsImport.update({
-  id: '/settings',
-  path: '/settings',
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
 
-const MyDevspaceRoute = MyDevspaceImport.update({
-  id: '/my-devspace',
-  path: '/my-devspace',
+const R404Route = R404Import.update({
+  id: '/$404',
+  path: '/$404',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const ProjectProjectIdRoute = ProjectProjectIdImport.update({
-  id: '/project/$projectId',
-  path: '/project/$projectId',
-  getParentRoute: () => rootRoute,
+const AuthenticatedSettingsRoute = AuthenticatedSettingsImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
+
+const AuthenticatedMyDevspaceRoute = AuthenticatedMyDevspaceImport.update({
+  id: '/my-devspace',
+  path: '/my-devspace',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedProjectProjectIdRoute =
+  AuthenticatedProjectProjectIdImport.update({
+    id: '/project/$projectId',
+    path: '/project/$projectId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/$404': {
+      id: '/$404'
+      path: '/$404'
+      fullPath: '/$404'
+      preLoaderRoute: typeof R404Import
       parentRoute: typeof rootRoute
     }
-    '/my-devspace': {
-      id: '/my-devspace'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
+    '/_authenticated/my-devspace': {
+      id: '/_authenticated/my-devspace'
       path: '/my-devspace'
       fullPath: '/my-devspace'
-      preLoaderRoute: typeof MyDevspaceImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedMyDevspaceImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/settings': {
-      id: '/settings'
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof SettingsImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedSettingsImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/project/$projectId': {
-      id: '/project/$projectId'
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/project/$projectId': {
+      id: '/_authenticated/project/$projectId'
       path: '/project/$projectId'
       fullPath: '/project/$projectId'
-      preLoaderRoute: typeof ProjectProjectIdImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedProjectProjectIdImport
+      parentRoute: typeof AuthenticatedImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedMyDevspaceRoute: typeof AuthenticatedMyDevspaceRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedProjectProjectIdRoute: typeof AuthenticatedProjectProjectIdRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedMyDevspaceRoute: AuthenticatedMyDevspaceRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedProjectProjectIdRoute: AuthenticatedProjectProjectIdRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/my-devspace': typeof MyDevspaceRoute
-  '/settings': typeof SettingsRoute
-  '/project/$projectId': typeof ProjectProjectIdRoute
+  '/$404': typeof R404Route
+  '': typeof AuthenticatedRouteWithChildren
+  '/my-devspace': typeof AuthenticatedMyDevspaceRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/my-devspace': typeof MyDevspaceRoute
-  '/settings': typeof SettingsRoute
-  '/project/$projectId': typeof ProjectProjectIdRoute
+  '/$404': typeof R404Route
+  '/my-devspace': typeof AuthenticatedMyDevspaceRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/my-devspace': typeof MyDevspaceRoute
-  '/settings': typeof SettingsRoute
-  '/project/$projectId': typeof ProjectProjectIdRoute
+  '/$404': typeof R404Route
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_authenticated/my-devspace': typeof AuthenticatedMyDevspaceRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/my-devspace' | '/settings' | '/project/$projectId'
+  fullPaths:
+    | '/$404'
+    | ''
+    | '/my-devspace'
+    | '/settings'
+    | '/'
+    | '/project/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/my-devspace' | '/settings' | '/project/$projectId'
-  id: '__root__' | '/' | '/my-devspace' | '/settings' | '/project/$projectId'
+  to: '/$404' | '/my-devspace' | '/settings' | '/' | '/project/$projectId'
+  id:
+    | '__root__'
+    | '/$404'
+    | '/_authenticated'
+    | '/_authenticated/my-devspace'
+    | '/_authenticated/settings'
+    | '/_authenticated/'
+    | '/_authenticated/project/$projectId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  MyDevspaceRoute: typeof MyDevspaceRoute
-  SettingsRoute: typeof SettingsRoute
-  ProjectProjectIdRoute: typeof ProjectProjectIdRoute
+  R404Route: typeof R404Route
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  MyDevspaceRoute: MyDevspaceRoute,
-  SettingsRoute: SettingsRoute,
-  ProjectProjectIdRoute: ProjectProjectIdRoute,
+  R404Route: R404Route,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -134,23 +194,37 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/my-devspace",
-        "/settings",
-        "/project/$projectId"
+        "/$404",
+        "/_authenticated"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/$404": {
+      "filePath": "$404.tsx"
     },
-    "/my-devspace": {
-      "filePath": "my-devspace.tsx"
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
+      "children": [
+        "/_authenticated/my-devspace",
+        "/_authenticated/settings",
+        "/_authenticated/",
+        "/_authenticated/project/$projectId"
+      ]
     },
-    "/settings": {
-      "filePath": "settings.tsx"
+    "/_authenticated/my-devspace": {
+      "filePath": "_authenticated/my-devspace.tsx",
+      "parent": "/_authenticated"
     },
-    "/project/$projectId": {
-      "filePath": "project.$projectId.tsx"
+    "/_authenticated/settings": {
+      "filePath": "_authenticated/settings.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/": {
+      "filePath": "_authenticated/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/project/$projectId": {
+      "filePath": "_authenticated/project.$projectId.tsx",
+      "parent": "/_authenticated"
     }
   }
 }

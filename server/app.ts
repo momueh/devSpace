@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { serveStatic } from 'hono/bun';
 import { userRoute } from './routes/user';
+import { authRoute } from './routes/auth';
 
 const app = new Hono();
 app.use('*', logger());
@@ -20,7 +21,10 @@ app.use(
   })
 );
 
-const apiRoutes = app.basePath('/api').route('/user', userRoute);
+const apiRoutes = app
+  .basePath('/api')
+  .route('/user', userRoute)
+  .route('/', authRoute);
 
 // Serve frontend for all other routes
 app.get('*', serveStatic({ root: './frontend/dist' }));
