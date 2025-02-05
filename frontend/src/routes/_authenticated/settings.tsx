@@ -11,12 +11,13 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { userQueryOptions } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = {
-  component: Settings,
-};
+export const Route = createFileRoute('/_authenticated/settings')({
+  component: SettingsPage,
+});
 
-function Settings() {
+function SettingsPage() {
   const { isPending, error, data } = useQuery(userQueryOptions);
 
   if (isPending) return 'loading';

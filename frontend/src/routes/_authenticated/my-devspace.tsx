@@ -1,5 +1,5 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '@/components/ui/badge';
+import { ColumnDef } from '@tanstack/react-table'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   // TableBody,
@@ -7,21 +7,21 @@ import {
   // TableHead,
   // TableHeader,
   // TableRow,
-} from '@/components/ui/table';
-import { Link } from '@tanstack/react-router';
+} from '@/components/ui/table'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
-export const Route = {
+export const Route = createFileRoute('/_authenticated/my-devspace')({
   component: MyDevSpace,
-};
+})
 
 type Task = {
-  id: number;
-  title: string;
-  project: string;
-  status: 'In Progress' | 'Todo' | 'Done';
-  priority: 'High' | 'Medium' | 'Low';
-  dueDate: string;
-};
+  id: number
+  title: string
+  project: string
+  status: 'In Progress' | 'Todo' | 'Done'
+  priority: 'High' | 'Medium' | 'Low'
+  dueDate: string
+}
 
 const tasks: Task[] = [
   {
@@ -40,14 +40,14 @@ const tasks: Task[] = [
     priority: 'Medium',
     dueDate: '2024-02-25',
   },
-];
+]
 
 const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'title',
     header: 'Task',
     cell: ({ row }) => (
-      <div className='font-medium'>{row.getValue('title')}</div>
+      <div className="font-medium">{row.getValue('title')}</div>
     ),
   },
   {
@@ -55,10 +55,10 @@ const columns: ColumnDef<Task>[] = [
     header: 'Project',
     cell: ({ row }) => (
       <Link
-        from='/my-devspace'
-        to='/project/$projectId'
+        from="/my-devspace"
+        to="/project/$projectId"
         params={{ projectId: row.original.id.toString() }}
-        className='text-blue-500 hover:underline'
+        className="text-blue-500 hover:underline"
       >
         {row.getValue('project')}
       </Link>
@@ -68,7 +68,7 @@ const columns: ColumnDef<Task>[] = [
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue('status') as string;
+      const status = row.getValue('status') as string
       return (
         <Badge
           variant={
@@ -81,14 +81,14 @@ const columns: ColumnDef<Task>[] = [
         >
           {status}
         </Badge>
-      );
+      )
     },
   },
   {
     accessorKey: 'priority',
     header: 'Priority',
     cell: ({ row }) => {
-      const priority = row.getValue('priority') as string;
+      const priority = row.getValue('priority') as string
       return (
         <Badge
           variant={
@@ -101,25 +101,25 @@ const columns: ColumnDef<Task>[] = [
         >
           {priority}
         </Badge>
-      );
+      )
     },
   },
   {
     accessorKey: 'dueDate',
     header: 'Due Date',
   },
-];
+]
 
 function MyDevSpace() {
   return (
-    <div className='space-y-6'>
+    <div className="space-y-6">
       <div>
-        <h1 className='text-3xl font-bold tracking-tight'>My DevSpace</h1>
-        <p className='text-muted-foreground'>
+        <h1 className="text-3xl font-bold tracking-tight">My DevSpace</h1>
+        <p className="text-muted-foreground">
           View and manage all your tasks across projects
         </p>
       </div>
       <Table columns={columns} data={tasks} />
     </div>
-  );
+  )
 }

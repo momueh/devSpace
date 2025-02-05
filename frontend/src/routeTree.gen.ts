@@ -11,30 +11,30 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as PublicImport } from './routes/_public'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
-import { Route as R404Import } from './routes/$404'
-import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as PublicIndexImport } from './routes/_public/index'
 import { Route as AuthenticatedSettingsImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMyDevspaceImport } from './routes/_authenticated/my-devspace'
+import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedProjectProjectIdImport } from './routes/_authenticated/project.$projectId'
 
 // Create/Update Routes
+
+const PublicRoute = PublicImport.update({
+  id: '/_public',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AuthenticatedRoute = AuthenticatedImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
 
-const R404Route = R404Import.update({
-  id: '/$404',
-  path: '/$404',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
+const PublicIndexRoute = PublicIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => PublicRoute,
 } as any)
 
 const AuthenticatedSettingsRoute = AuthenticatedSettingsImport.update({
@@ -49,6 +49,12 @@ const AuthenticatedMyDevspaceRoute = AuthenticatedMyDevspaceImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
+const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
 const AuthenticatedProjectProjectIdRoute =
   AuthenticatedProjectProjectIdImport.update({
     id: '/project/$projectId',
@@ -60,19 +66,26 @@ const AuthenticatedProjectProjectIdRoute =
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/$404': {
-      id: '/$404'
-      path: '/$404'
-      fullPath: '/$404'
-      preLoaderRoute: typeof R404Import
-      parentRoute: typeof rootRoute
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
+    }
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof PublicImport
+      parentRoute: typeof rootRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardImport
+      parentRoute: typeof AuthenticatedImport
     }
     '/_authenticated/my-devspace': {
       id: '/_authenticated/my-devspace'
@@ -88,12 +101,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsImport
       parentRoute: typeof AuthenticatedImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexImport
-      parentRoute: typeof AuthenticatedImport
+      preLoaderRoute: typeof PublicIndexImport
+      parentRoute: typeof PublicImport
     }
     '/_authenticated/project/$projectId': {
       id: '/_authenticated/project/$projectId'
@@ -108,16 +121,16 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMyDevspaceRoute: typeof AuthenticatedMyDevspaceRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedProjectProjectIdRoute: typeof AuthenticatedProjectProjectIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMyDevspaceRoute: AuthenticatedMyDevspaceRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedProjectProjectIdRoute: AuthenticatedProjectProjectIdRoute,
 }
 
@@ -125,63 +138,83 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface PublicRouteChildren {
+  PublicIndexRoute: typeof PublicIndexRoute
+}
+
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicIndexRoute: PublicIndexRoute,
+}
+
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/$404': typeof R404Route
-  '': typeof AuthenticatedRouteWithChildren
+  '': typeof PublicRouteWithChildren
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/my-devspace': typeof AuthenticatedMyDevspaceRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof PublicIndexRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
 
 export interface FileRoutesByTo {
-  '/$404': typeof R404Route
+  '': typeof AuthenticatedRouteWithChildren
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/my-devspace': typeof AuthenticatedMyDevspaceRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof PublicIndexRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/$404': typeof R404Route
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_public': typeof PublicRouteWithChildren
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/my-devspace': typeof AuthenticatedMyDevspaceRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_public/': typeof PublicIndexRoute
   '/_authenticated/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/$404'
     | ''
+    | '/dashboard'
     | '/my-devspace'
     | '/settings'
     | '/'
     | '/project/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$404' | '/my-devspace' | '/settings' | '/' | '/project/$projectId'
+  to:
+    | ''
+    | '/dashboard'
+    | '/my-devspace'
+    | '/settings'
+    | '/'
+    | '/project/$projectId'
   id:
     | '__root__'
-    | '/$404'
     | '/_authenticated'
+    | '/_public'
+    | '/_authenticated/dashboard'
     | '/_authenticated/my-devspace'
     | '/_authenticated/settings'
-    | '/_authenticated/'
+    | '/_public/'
     | '/_authenticated/project/$projectId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  R404Route: typeof R404Route
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  PublicRoute: typeof PublicRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  R404Route: R404Route,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  PublicRoute: PublicRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -194,21 +227,28 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/$404",
-        "/_authenticated"
+        "/_authenticated",
+        "/_public"
       ]
-    },
-    "/$404": {
-      "filePath": "$404.tsx"
     },
     "/_authenticated": {
       "filePath": "_authenticated.tsx",
       "children": [
+        "/_authenticated/dashboard",
         "/_authenticated/my-devspace",
         "/_authenticated/settings",
-        "/_authenticated/",
         "/_authenticated/project/$projectId"
       ]
+    },
+    "/_public": {
+      "filePath": "_public.tsx",
+      "children": [
+        "/_public/"
+      ]
+    },
+    "/_authenticated/dashboard": {
+      "filePath": "_authenticated/dashboard.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/my-devspace": {
       "filePath": "_authenticated/my-devspace.tsx",
@@ -218,9 +258,9 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/": {
-      "filePath": "_authenticated/index.tsx",
-      "parent": "/_authenticated"
+    "/_public/": {
+      "filePath": "_public/index.tsx",
+      "parent": "/_public"
     },
     "/_authenticated/project/$projectId": {
       "filePath": "_authenticated/project.$projectId.tsx",

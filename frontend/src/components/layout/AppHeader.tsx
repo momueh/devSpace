@@ -1,4 +1,4 @@
-import { LogOut, Search, Settings, User } from 'lucide-react';
+import { LogOut, Search, User } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,10 +41,10 @@ export function AppHeader() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to='/api/logout'>
+                <a href='/api/logout'>
                   <LogOut className='mr-2 h-4 w-4' />
                   <span>Logout</span>
-                </Link>
+                </a>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

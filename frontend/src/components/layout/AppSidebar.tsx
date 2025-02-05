@@ -1,5 +1,3 @@
-import { LayoutDashboard, ListTodo, Settings } from 'lucide-react';
-import { Link, useRouter } from '@tanstack/react-router';
 import {
   Sidebar,
   SidebarContent,
@@ -10,28 +8,34 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { CheckSquare, LayoutDashboard, Settings } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 
-const menuItems = [
+// Menu items.
+const items = [
   {
     title: 'Dashboard',
+    url: '/dashboard',
     icon: LayoutDashboard,
-    path: '/',
   },
+  // {
+  //   title: 'Projects',
+  //   url: '/projects',
+  //   icon: FolderKanban,
+  // },
   {
     title: 'My DevSpace',
-    icon: ListTodo,
-    path: '/my-devspace',
+    url: '/my-devspace',
+    icon: CheckSquare,
   },
   {
     title: 'Settings',
+    url: '/settings',
     icon: Settings,
-    path: '/settings',
   },
 ];
 
 export function AppSidebar() {
-  const router = useRouter();
-
   return (
     <Sidebar>
       <SidebarContent>
@@ -44,14 +48,11 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={router.state.location.pathname === item.path}
-                  >
-                    <Link to={item.path}>
-                      <item.icon className='h-4 w-4' />
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.url}>
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>

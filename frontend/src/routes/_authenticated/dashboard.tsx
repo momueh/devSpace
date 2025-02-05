@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = {
+export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
-};
+});
 
 function Dashboard() {
   const projects = [

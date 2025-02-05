@@ -16,7 +16,7 @@ export const authRoute = new Hono()
     // gets called every time we login or register
     const url = new URL(c.req.url);
     await kindeClient.handleRedirectToApp(sessionManager(c), url);
-    return c.redirect('/');
+    return c.redirect('/dashboard');
   })
   .get('/logout', async (c) => {
     const logoutUrl = await kindeClient.logout(sessionManager(c));
