@@ -4,17 +4,23 @@
   "type": "module",
   "script": {
     "start": "bun server/index.ts",
-    "dev": "bun --watch server/index.ts"
+    "dev": "bun --watch server/index.ts",
+    "migrate:dev": "bun migrate.ts",
+    "studio:dev": "bun drizzle-kit studio"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.7.4",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.30.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "hono": "^4.6.20",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "drizzle-orm": "^0.39.1",
+    "drizzle-zod": "^0.5.1",
+    "postgres": "^3.4.5"
   }
 }
