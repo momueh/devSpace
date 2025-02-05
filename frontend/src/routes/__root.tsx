@@ -1,7 +1,7 @@
 import { AppSidebar } from '@/components/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from '@/components/ui/sonner';
 // import { AuthContextType } from '@/lib/auth/AuthProvider';
 import { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
