@@ -5,6 +5,8 @@ import { eq } from 'drizzle-orm';
 import { insertProjectSchema } from '../db/schema/project';
 import { requireAuth } from '../auth/middleware';
 import { projectMember, ProjectRole } from '../db/schema/projectMember';
+import { sendEmail } from '../email';
+import { user } from '../db/schema/user';
 
 export const projectRoute = new Hono()
   .use('/*', requireAuth)
@@ -155,19 +157,20 @@ export const projectRoute = new Hono()
   .post('/:id/members', async (c) => {
     const projectId = Number(c.req.param('id'));
     const { email, role } = await c.req.json();
-    const user = c.var.user;
+    const currentUser = c.var.user;
 
     try {
       // Check if user is project owner
-      const projectMember = await db.query.projectMember.findFirst({
-        where: and(
-          eq(projectMember.projectId, projectId),
-          eq(projectMember.userId, user.id),
-          eq(projectMember.role, ProjectRole.OWNER)
-        ),
+      const member = await db.query.projectMember.findFirst({
+        where: (members, { and, eq }) =>
+          and(
+            eq(members.projectId, projectId),
+            eq(members.userId, currentUser.id),
+            eq(members.role, ProjectRole.OWNER)
+          ),
       });
 
-      if (!projectMember) {
+      if (!member) {
         return c.json({ error: 'Unauthorized' }, 403);
       }
 
@@ -189,6 +192,12 @@ export const projectRoute = new Hono()
           role,
         })
         .returning();
+
+      await sendEmail(
+        email,
+        'You have been added to a project',
+        `<p>You have been added to a project. You can view the project <a href="https://devspace.app/projects/${projectId}">here</a></p>`
+      );
 
       return c.json(newMember);
     } catch (error) {
