@@ -4,19 +4,61 @@ import { project } from '../db/schema/project';
 import { eq } from 'drizzle-orm';
 import { insertProjectSchema } from '../db/schema/project';
 import { requireAuth } from '../auth/middleware';
+import { projectMember, ProjectRole } from '../db/schema/projectMember';
 
 export const projectRoute = new Hono()
   .use('/*', requireAuth)
-  // Get project with its tasks
+
+  // Get all projects for a user
+  .get('/', async (c) => {
+    const user = c.var.user;
+
+    try {
+      const projects = await db.query.project.findMany({
+        where: (project, { exists, eq, and }) =>
+          exists(
+            db
+              .select()
+              .from(projectMember)
+              .where(
+                and(
+                  eq(projectMember.projectId, project.id),
+                  eq(projectMember.userId, user.id)
+                )
+              )
+          ),
+        with: {
+          tasks: true,
+          members: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      return c.json(projects);
+    } catch (error) {
+      console.log(error);
+      return c.json({ error: 'Failed to fetch projects' }, 500);
+    }
+  })
+
+  // Get project with members and tasks
   .get('/:id', async (c) => {
     const id = Number(c.req.param('id'));
-    // const user = c.var.user;
+    const user = c.var.user;
 
     try {
       const result = await db.query.project.findFirst({
         where: eq(project.id, id),
         with: {
           tasks: true,
+          members: {
+            with: {
+              user: true,
+            },
+          },
         },
       });
 
@@ -30,7 +72,7 @@ export const projectRoute = new Hono()
     }
   })
 
-  // Create new project
+  // Create new project and set owner
   .post('/', async (c) => {
     const data = await c.req.json();
     const user = c.var.user;
@@ -45,6 +87,13 @@ export const projectRoute = new Hono()
         .insert(project)
         .values(validatedData)
         .returning();
+
+      // Add creator as project owner
+      await db.insert(projectMember).values({
+        projectId: newProject.id,
+        userId: user.id,
+        role: ProjectRole.OWNER,
+      });
 
       return c.json(newProject);
     } catch (error) {
@@ -99,5 +148,50 @@ export const projectRoute = new Hono()
       return c.json({ success: true });
     } catch (error) {
       return c.json({ error: 'Failed to delete project' }, 500);
+    }
+  })
+
+  // Add member to project
+  .post('/:id/members', async (c) => {
+    const projectId = Number(c.req.param('id'));
+    const { email, role } = await c.req.json();
+    const user = c.var.user;
+
+    try {
+      // Check if user is project owner
+      const projectMember = await db.query.projectMember.findFirst({
+        where: and(
+          eq(projectMember.projectId, projectId),
+          eq(projectMember.userId, user.id),
+          eq(projectMember.role, ProjectRole.OWNER)
+        ),
+      });
+
+      if (!projectMember) {
+        return c.json({ error: 'Unauthorized' }, 403);
+      }
+
+      // Find user by email
+      const invitedUser = await db.query.user.findFirst({
+        where: eq(user.email, email),
+      });
+
+      if (!invitedUser) {
+        return c.json({ error: 'User not found' }, 404);
+      }
+
+      // Add member
+      const [newMember] = await db
+        .insert(projectMember)
+        .values({
+          projectId,
+          userId: invitedUser.id,
+          role,
+        })
+        .returning();
+
+      return c.json(newMember);
+    } catch (error) {
+      return c.json({ error: 'Failed to add member' }, 500);
     }
   });

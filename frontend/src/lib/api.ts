@@ -21,6 +21,15 @@ export const userQueryOptions = queryOptions({
   staleTime: Infinity,
 });
 
+export const getUserProjectsQueryOptions = () => ({
+  queryKey: ['projects'],
+  queryFn: async () => {
+    const res = await api.project.$get();
+    if (!res.ok) throw new Error('Failed to fetch projects');
+    return res.json();
+  },
+});
+
 export async function getProject(projectId: number) {
   const res = await api.project[':id'].$get({
     param: { id: projectId.toString() },

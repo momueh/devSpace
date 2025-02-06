@@ -1,16 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+// import { Progress } from '@/components/ui/progress';
 import { Link } from '@tanstack/react-router';
 
 interface ProjectCardProps {
   project: {
     id: number;
     name: string;
-    progress: number;
-    tasks: {
-      total: number;
-      completed: number;
-    };
+    // progress?: number;
+    // tasks: {
+    //   total: number;
+    //   completed: number;
+    // };
   };
 }
 
@@ -27,10 +27,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </CardHeader>
         <CardContent>
           <div className='space-y-4'>
-            <Progress value={project.progress} />
+            {/* <Progress value={project.progress} />
             <div className='text-sm text-muted-foreground'>
               {project.tasks.completed} of {project.tasks.total} tasks completed
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>

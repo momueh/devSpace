@@ -4,6 +4,7 @@ import postgres from 'postgres';
 import {
   commentRelations,
   noteRelations,
+  projectMemberRelations,
   projectRelations,
   sessionRelations,
   taskRelations,
@@ -15,12 +16,14 @@ import { comment } from './schema/comment';
 import { task } from './schema/task';
 import { project } from './schema/project';
 import { session } from './schema/session';
+import { projectMember } from './schema/projectMember';
 
 // combine all schemas into one object
 const schema = {
   // tables
   user,
   project,
+  projectMember,
   task,
   note,
   comment,
@@ -28,6 +31,7 @@ const schema = {
   // relations
   userRelations,
   projectRelations,
+  projectMemberRelations,
   taskRelations,
   noteRelations,
   commentRelations,

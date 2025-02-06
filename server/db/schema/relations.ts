@@ -5,9 +5,11 @@ import { task } from './task';
 import { note } from './note';
 import { comment } from './comment';
 import { session } from './session';
+import { projectMember } from './projectMember';
 
 export const userRelations = relations(user, ({ many }) => ({
-  projects: many(project),
+  ownedProjects: many(project),
+  projectMemberships: many(projectMember),
   assignedTasks: many(task, { relationName: 'assignee' }),
   notes: many(note),
   comments: many(comment),
@@ -19,6 +21,7 @@ export const projectRelations = relations(project, ({ one, many }) => ({
     references: [user.id],
   }),
   tasks: many(task),
+  members: many(projectMember),
 }));
 
 export const taskRelations = relations(task, ({ one, many }) => ({
@@ -61,5 +64,16 @@ export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
     references: [user.id],
+  }),
+}));
+
+export const projectMemberRelations = relations(projectMember, ({ one }) => ({
+  user: one(user, {
+    fields: [projectMember.userId],
+    references: [user.id],
+  }),
+  project: one(project, {
+    fields: [projectMember.projectId],
+    references: [project.id],
   }),
 }));

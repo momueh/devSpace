@@ -1,26 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-import { ArrowLeft, Plus } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from '@tanstack/react-router';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import { toast } from 'sonner';
 import { getProjectQueryOptions } from '@/lib/api';
+import { ProjectModal } from '@/components/Modals/ProjectModal';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
@@ -46,6 +40,7 @@ function ProjectPage() {
     { id: '4', title: 'Write documentation', status: 'In Review' },
   ]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   const {
     data: project,
@@ -95,65 +90,50 @@ function ProjectPage() {
   };
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <Button variant='ghost' asChild>
-          <Link to='/my-devspace'>
-            <ArrowLeft className='h-4 w-4 mr-2' />
-            Back to Tasks
-          </Link>
-        </Button>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className='h-4 w-4 mr-2' />
-              Add Task
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Task</DialogTitle>
-            </DialogHeader>
-            <div className='space-y-4 pt-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='title'>Task Title</Label>
-                <Input
-                  id='title'
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder='Enter task title'
-                />
-              </div>
-              <Button onClick={handleCreateTask}>Create Task</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div>
+    <div className='flex flex-col h-[calc(100vh-4rem)]'>
+      <div className='flex items-center justify-between p-6'>
         <h1 className='text-3xl font-bold tracking-tight'>
           Project #{projectId}
         </h1>
+        <Button onClick={() => setIsProjectModalOpen(true)}>
+          <Edit className='h-4 w-4 mr-2' />
+          Manage Project
+        </Button>
       </div>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className='grid grid-cols-4 gap-4'>
-          {columns.map((column) => (
-            <div key={column} className='space-y-4'>
-              <div className='flex items-center justify-between'>
-                <h2 className='font-semibold'>{column}</h2>
-                <Badge variant='secondary'>
-                  {tasks.filter((task) => task.status === column).length}
-                </Badge>
-              </div>
-              <Droppable droppableId={column}>
-                {(provided) => (
-                  <ScrollArea className='h-[calc(100vh-300px)]'>
+      <div className='pt-20 flex-1'>
+        <div className='p-6 pt-0'>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateTask();
+            }}
+          >
+            <Input
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder='Add new task ...'
+              className='max-w-md'
+            />
+          </form>
+        </div>
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className='grid grid-cols-4 gap-4 p-6 pt-0'>
+            {columns.map((column) => (
+              <div key={column} className='flex flex-col h-full'>
+                <div className='flex items-center justify-between mb-4'>
+                  <h2 className='font-semibold'>{column}</h2>
+                  <Badge variant='secondary'>
+                    {tasks.filter((task) => task.status === column).length}
+                  </Badge>
+                </div>
+                <Droppable droppableId={column}>
+                  {(provided) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className='space-y-2 p-2 min-h-[200px] bg-muted/50 rounded-lg'
+                      className='flex-1 space-y-2 p-2 min-h-[200px] bg-muted/50 rounded-lg overflow-y-auto'
                     >
                       {tasks
                         .filter((task) => task.status === column)
@@ -179,13 +159,19 @@ function ProjectPage() {
                         ))}
                       {provided.placeholder}
                     </div>
-                  </ScrollArea>
-                )}
-              </Droppable>
-            </div>
-          ))}
-        </div>
-      </DragDropContext>
+                  )}
+                </Droppable>
+              </div>
+            ))}
+          </div>
+        </DragDropContext>
+      </div>
+
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        project={project}
+      />
     </div>
   );
 }
