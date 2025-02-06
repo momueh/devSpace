@@ -1,6 +1,7 @@
 import { hc } from 'hono/client';
 import { type ApiRoutes } from '@server/app';
 import { queryOptions } from '@tanstack/react-query';
+import { User } from '@server/db/schema/user';
 
 const client = hc<ApiRoutes>('/');
 
@@ -65,3 +66,12 @@ export async function updateTask(taskId: number, status: string) {
   if (!res.ok) throw new Error('Failed to update task');
   return res.json();
 }
+
+export const updateUser = async (userId: number, data: Partial<User>) => {
+  const res = await api.user[':id'].$patch({
+    param: { id: userId.toString() },
+    json: data,
+  });
+  if (!res.ok) throw new Error('Failed to update user');
+  return res.json();
+};
