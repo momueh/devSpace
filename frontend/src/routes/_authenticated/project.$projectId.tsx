@@ -20,12 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-
-const getProjectQueryOptions = (projectId: string) =>
-  queryOptions({
-    queryKey: ['project', projectId],
-    // queryFn: () => getProject(parseInt(projectId)),
-  });
+import { getProjectQueryOptions } from '@/lib/api';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>

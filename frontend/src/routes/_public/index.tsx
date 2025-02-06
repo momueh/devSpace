@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckSquare, Home } from 'lucide-react';
@@ -44,7 +44,7 @@ function LandingPage() {
 
         <div className='space-y-4'>
           <Button className='w-full max-w-sm' size='lg' asChild>
-            <a href='/api/login'>Get Started</a>
+            <Link to='/login'>Get Started</Link>
           </Button>
         </div>
       </div>

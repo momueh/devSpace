@@ -1,12 +1,20 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import {} from './schema/relations';
+import {
+  commentRelations,
+  noteRelations,
+  projectRelations,
+  sessionRelations,
+  taskRelations,
+  userRelations,
+} from './schema/relations';
 import { user } from './schema/user';
 import { note } from './schema/note';
 import { comment } from './schema/comment';
 import { task } from './schema/task';
 import { project } from './schema/project';
+import { session } from './schema/session';
 
 // combine all schemas into one object
 const schema = {
@@ -16,7 +24,14 @@ const schema = {
   task,
   note,
   comment,
+  session,
   // relations
+  userRelations,
+  projectRelations,
+  taskRelations,
+  noteRelations,
+  commentRelations,
+  sessionRelations,
 };
 
 if (!process.env.DATABASE_URL) {

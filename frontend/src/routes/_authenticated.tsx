@@ -1,35 +1,39 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { userQueryOptions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
+import { BaseHeader } from '@/components/layout/BaseHeader';
 
-const Login = () => {
+const UnauthenticatedBlocker = () => {
   return (
-    <div className='flex-1 flex flex-col items-center justify-center p-6'>
-      <div className='text-center space-y-4'>
-        <h2 className='text-2xl font-semibold'>Authentication Required</h2>
-        <p className='text-muted-foreground'>
-          Please login or register to access this page
-        </p>
-        <div className='flex gap-4 justify-center'>
-          <Button asChild>
-            <a href='/api/login'>Login</a>
-          </Button>
-          <Button variant='outline' asChild>
-            <a href='/api/register'>Register</a>
-          </Button>
+    <>
+      <BaseHeader />
+      <div className='flex-1 flex flex-col items-center justify-center p-6'>
+        <div className='text-center space-y-4'>
+          <h2 className='text-2xl font-semibold'>Authentication Required</h2>
+          <p className='text-muted-foreground'>
+            Please login or register to access this page
+          </p>
+          <div className='flex gap-4 justify-center'>
+            <Button asChild>
+              <Link to='/login'>Login</Link>
+            </Button>
+            <Button variant='outline' asChild>
+              <Link to='/register'>Register</Link>
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
 const AuthenticatedPage = () => {
   const { user } = Route.useRouteContext();
   if (!user) {
-    return <Login />;
+    return <UnauthenticatedBlocker />;
   }
 
   return (

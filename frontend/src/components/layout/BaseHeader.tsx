@@ -12,10 +12,10 @@ export function BaseHeader() {
         </div>
         <div className='flex items-center gap-2'>
           <Button variant='ghost' asChild>
-            <a href='/api/login'>Login</a>
+            <Link to='/login'>Login</Link>
           </Button>
           <Button asChild>
-            <a href='/api/register'>Register</a>
+            <Link to='/register'>Register</Link>
           </Button>
         </div>
       </div>

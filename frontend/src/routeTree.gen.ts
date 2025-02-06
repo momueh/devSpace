@@ -14,6 +14,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as PublicImport } from './routes/_public'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as PublicIndexImport } from './routes/_public/index'
+import { Route as PublicRegisterImport } from './routes/_public/register'
+import { Route as PublicLoginImport } from './routes/_public/login'
 import { Route as AuthenticatedSettingsImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMyDevspaceImport } from './routes/_authenticated/my-devspace'
 import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
@@ -34,6 +36,18 @@ const AuthenticatedRoute = AuthenticatedImport.update({
 const PublicIndexRoute = PublicIndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => PublicRoute,
+} as any)
+
+const PublicRegisterRoute = PublicRegisterImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => PublicRoute,
+} as any)
+
+const PublicLoginRoute = PublicLoginImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => PublicRoute,
 } as any)
 
@@ -101,6 +115,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/_public/login': {
+      id: '/_public/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof PublicLoginImport
+      parentRoute: typeof PublicImport
+    }
+    '/_public/register': {
+      id: '/_public/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof PublicRegisterImport
+      parentRoute: typeof PublicImport
+    }
     '/_public/': {
       id: '/_public/'
       path: '/'
@@ -139,10 +167,14 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface PublicRouteChildren {
+  PublicLoginRoute: typeof PublicLoginRoute
+  PublicRegisterRoute: typeof PublicRegisterRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicLoginRoute: PublicLoginRoute,
+  PublicRegisterRoute: PublicRegisterRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 
@@ -154,6 +186,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/my-devspace': typeof AuthenticatedMyDevspaceRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/login': typeof PublicLoginRoute
+  '/register': typeof PublicRegisterRoute
   '/': typeof PublicIndexRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
@@ -163,6 +197,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/my-devspace': typeof AuthenticatedMyDevspaceRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/login': typeof PublicLoginRoute
+  '/register': typeof PublicRegisterRoute
   '/': typeof PublicIndexRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
@@ -174,6 +210,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/my-devspace': typeof AuthenticatedMyDevspaceRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_public/login': typeof PublicLoginRoute
+  '/_public/register': typeof PublicRegisterRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/project/$projectId': typeof AuthenticatedProjectProjectIdRoute
 }
@@ -185,6 +223,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/my-devspace'
     | '/settings'
+    | '/login'
+    | '/register'
     | '/'
     | '/project/$projectId'
   fileRoutesByTo: FileRoutesByTo
@@ -193,6 +233,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/my-devspace'
     | '/settings'
+    | '/login'
+    | '/register'
     | '/'
     | '/project/$projectId'
   id:
@@ -202,6 +244,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/my-devspace'
     | '/_authenticated/settings'
+    | '/_public/login'
+    | '/_public/register'
     | '/_public/'
     | '/_authenticated/project/$projectId'
   fileRoutesById: FileRoutesById
@@ -243,6 +287,8 @@ export const routeTree = rootRoute
     "/_public": {
       "filePath": "_public.tsx",
       "children": [
+        "/_public/login",
+        "/_public/register",
         "/_public/"
       ]
     },
@@ -257,6 +303,14 @@ export const routeTree = rootRoute
     "/_authenticated/settings": {
       "filePath": "_authenticated/settings.tsx",
       "parent": "/_authenticated"
+    },
+    "/_public/login": {
+      "filePath": "_public/login.tsx",
+      "parent": "/_public"
+    },
+    "/_public/register": {
+      "filePath": "_public/register.tsx",
+      "parent": "/_public"
     },
     "/_public/": {
       "filePath": "_public/index.tsx",

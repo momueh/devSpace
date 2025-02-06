@@ -4,6 +4,7 @@ import { project } from './project';
 import { task } from './task';
 import { note } from './note';
 import { comment } from './comment';
+import { session } from './session';
 
 export const userRelations = relations(user, ({ many }) => ({
   projects: many(project),
@@ -53,5 +54,12 @@ export const commentRelations = relations(comment, ({ one }) => ({
   task: one(task, {
     fields: [comment.taskId],
     references: [task.id],
+  }),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
   }),
 }));

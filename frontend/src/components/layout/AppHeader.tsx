@@ -40,7 +40,7 @@ export function AppHeader() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <a href='/api/logout'>
+                <a href='/api/auth/logout'>
                   <LogOut className='mr-2 h-4 w-4' />
                   <span>Logout</span>
                 </a>
