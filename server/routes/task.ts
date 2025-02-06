@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { insertTaskSchema } from '../db/schema/task';
 import { project } from '../db/schema/project';
 import { requireAuth } from '../auth/middleware';
+import { sendEmail } from '../email';
 
 export const taskRoute = new Hono()
   .use('/*', requireAuth)
@@ -14,20 +15,12 @@ export const taskRoute = new Hono()
     const user = c.var.user;
 
     try {
-      // Check if user owns the project
-      const projectResult = await db.query.project.findFirst({
-        where: eq(project.id, data.projectId),
-      });
-
-      if (!projectResult) {
-        return c.json({ error: 'Unauthorized' }, 403);
-      }
-
       const validatedData = insertTaskSchema.parse(data);
       const [newTask] = await db.insert(task).values(validatedData).returning();
 
       return c.json(newTask);
     } catch (error) {
+      console.error(error);
       return c.json({ error: 'Failed to create task' }, 500);
     }
   })

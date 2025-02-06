@@ -13,12 +13,18 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Input } from '@/components/ui/input';
 
 import { toast } from 'sonner';
-import { getProjectQueryOptions } from '@/lib/api';
+import {
+  createTask,
+  deleteTask,
+  getProjectQueryOptions,
+  updateTask,
+} from '@/lib/api';
 import { ProjectModal } from '@/components/Modals/ProjectModal';
+import { TaskDetailModal } from '@/components/Modals/TaskDetailModal';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
-    queryClient.ensureQueryData(getProjectQueryOptions(projectId)),
+    queryClient.ensureQueryData(getProjectQueryOptions(Number(projectId))),
   component: ProjectPage,
 });
 
@@ -32,21 +38,17 @@ interface Task {
 
 function ProjectPage() {
   const { projectId } = Route.useParams();
+  const queryClient = Route.useRouteContext().queryClient;
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Implement authentication', status: 'In Progress' },
-    { id: '2', title: 'Set up database', status: 'Done' },
-    { id: '3', title: 'Design UI mockups', status: 'Backlog' },
-    { id: '4', title: 'Write documentation', status: 'In Review' },
-  ]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const {
     data: project,
     isLoading,
     isError,
-  } = useSuspenseQuery(getProjectQueryOptions(projectId));
+  } = useSuspenseQuery(getProjectQueryOptions(Number(projectId)));
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -60,33 +62,52 @@ function ProjectPage() {
 
   const columns: TaskStatus[] = ['Backlog', 'In Progress', 'In Review', 'Done'];
 
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const items = Array.from(tasks);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    reorderedItem.status = result.destination.droppableId as TaskStatus;
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setTasks(items);
-    toast(`Task moved to ${result.destination.droppableId}`);
-  };
-
-  const handleCreateTask = () => {
+  const handleCreateTask = async () => {
     if (!newTaskTitle.trim()) {
       toast.error('Please enter a task title');
       return;
     }
 
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: newTaskTitle,
-      status: 'Backlog',
-    };
+    try {
+      await createTask(Number(projectId), {
+        title: newTaskTitle,
+        status: 'todo',
+      });
 
-    setTasks([...tasks, newTask]);
-    setNewTaskTitle('');
-    toast.success('Task created successfully');
+      queryClient.invalidateQueries({
+        queryKey: ['project', Number(projectId)],
+      });
+      setNewTaskTitle('');
+      toast.success('Task created successfully');
+    } catch (error) {
+      toast.error('Failed to create task');
+    }
+  };
+
+  const handleUpdateTask = async (taskId: number, updates: Partial<Task>) => {
+    await updateTask(taskId, updates);
+    queryClient.invalidateQueries({ queryKey: ['project', Number(projectId)] });
+  };
+
+  const handleDeleteTask = async (taskId: number) => {
+    await deleteTask(taskId);
+    queryClient.invalidateQueries({
+      queryKey: ['project', Number(projectId)],
+    });
+  };
+
+  const onDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    try {
+      const taskId = Number(result.draggableId);
+      await handleUpdateTask(taskId, {
+        status: result.destination.droppableId,
+      });
+      toast.success(`Task moved to ${result.destination.droppableId}`);
+    } catch (error) {
+      toast.error('Failed to move task');
+    }
   };
 
   return (
@@ -123,9 +144,12 @@ function ProjectPage() {
             {columns.map((column) => (
               <div key={column} className='flex flex-col h-full'>
                 <div className='flex items-center justify-between mb-4'>
-                  <h2 className='font-semibold'>{column}</h2>
+                  <h2 className='font-semibold capitalize'>{column}</h2>
                   <Badge variant='secondary'>
-                    {tasks.filter((task) => task.status === column).length}
+                    {
+                      project.tasks.filter((task) => task.status === column)
+                        .length
+                    }
                   </Badge>
                 </div>
                 <Droppable droppableId={column}>
@@ -135,12 +159,12 @@ function ProjectPage() {
                       {...provided.droppableProps}
                       className='flex-1 space-y-2 p-2 min-h-[200px] bg-muted/50 rounded-lg overflow-y-auto'
                     >
-                      {tasks
+                      {project.tasks
                         .filter((task) => task.status === column)
                         .map((task, index) => (
                           <Draggable
                             key={task.id}
-                            draggableId={task.id}
+                            draggableId={task.id.toString()}
                             index={index}
                           >
                             {(provided) => (
@@ -149,9 +173,23 @@ function ProjectPage() {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 className='cursor-grab active:cursor-grabbing'
+                                onClick={() => setSelectedTask(task)}
                               >
                                 <CardContent className='p-4'>
-                                  <p>{task.title}</p>
+                                  <div className='flex justify-between items-center'>
+                                    <p>{task.title}</p>
+                                    <Badge
+                                      variant={
+                                        task.priority === 'high'
+                                          ? 'destructive'
+                                          : task.priority === 'medium'
+                                            ? 'secondary'
+                                            : 'outline'
+                                      }
+                                    >
+                                      {task.priority}
+                                    </Badge>
+                                  </div>
                                 </CardContent>
                               </Card>
                             )}
@@ -166,6 +204,16 @@ function ProjectPage() {
           </div>
         </DragDropContext>
       </div>
+
+      {selectedTask && (
+        <TaskDetailModal
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          task={selectedTask}
+          onUpdate={handleUpdateTask}
+          onDelete={handleDeleteTask}
+        />
+      )}
 
       <ProjectModal
         isOpen={isProjectModalOpen}

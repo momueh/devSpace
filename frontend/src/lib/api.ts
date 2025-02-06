@@ -50,20 +50,30 @@ export async function createTask(
   projectId: number,
   task: { title: string; status: string }
 ) {
-  const res = await api.task[':id'].tasks.$post({
-    param: { id: projectId.toString() },
-    json: task,
+  const res = await api.task.$post({
+    json: {
+      ...task,
+      projectId, // Include projectId in the task data
+    },
   });
   if (!res.ok) throw new Error('Failed to create task');
   return res.json();
 }
 
-export async function updateTask(taskId: number, status: string) {
-  const res = await api.project.tasks[':taskId'].$patch({
-    param: { taskId: taskId.toString() },
-    json: { status },
+export async function updateTask(taskId: number, updates: Partial<Task>) {
+  const res = await api.task[':id'].$patch({
+    param: { id: taskId.toString() },
+    json: updates,
   });
   if (!res.ok) throw new Error('Failed to update task');
+  return res.json();
+}
+
+export async function deleteTask(taskId: number) {
+  const res = await api.task[':id'].$delete({
+    param: { id: taskId.toString() },
+  });
+  if (!res.ok) throw new Error('Failed to delete task');
   return res.json();
 }
 
