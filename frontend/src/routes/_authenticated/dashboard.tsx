@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ProjectCard } from '@/components/ProjectCard';
 import { useState } from 'react';
-import { ProjectModal } from '@/components/Modals/ProjectModal';
+
 import { Button } from '@/components/ui/button';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { getUserProjectsQueryOptions } from '@/lib/api';
+import { AddProjectModal } from '@/components/Modals/AddProjectModal';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   loader: ({ context: { queryClient } }) =>
@@ -46,7 +47,7 @@ function Dashboard() {
           ))}
         </div>
       )}
-      <ProjectModal
+      <AddProjectModal
         isOpen={isProjectModalOpen}
         onClose={() => setIsProjectModalOpen(false)}
       />

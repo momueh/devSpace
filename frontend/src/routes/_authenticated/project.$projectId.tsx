@@ -19,8 +19,12 @@ import {
   getProjectQueryOptions,
   updateTask,
 } from '@/lib/api';
-import { ProjectModal } from '@/components/Modals/ProjectModal';
+import {
+  EditProjectModal,
+  ProjectModal,
+} from '@/components/Modals/EditProjectModal';
 import { TaskDetailModal } from '@/components/Modals/TaskDetailModal';
+import { ManageTeamModal } from '@/components/Modals/ManageTeamModal';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
@@ -41,8 +45,10 @@ function ProjectPage() {
   const queryClient = Route.useRouteContext().queryClient;
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
+  const [isManageTeamModalOpen, setIsManageTeamModalOpen] = useState(false);
 
   const {
     data: project,
@@ -215,10 +221,16 @@ function ProjectPage() {
         />
       )}
 
-      <ProjectModal
-        isOpen={isProjectModalOpen}
-        onClose={() => setIsProjectModalOpen(false)}
+      <EditProjectModal
+        isOpen={isEditProjectModalOpen}
+        onClose={() => setIsEditProjectModalOpen(false)}
         project={project}
+      />
+      <ManageTeamModal
+        isOpen={isManageTeamModalOpen}
+        onClose={() => setIsManageTeamModalOpen(false)}
+        projectId={Number(projectId)}
+        members={project.members}
       />
     </div>
   );

@@ -10,9 +10,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Route } from '@/routes/_authenticated';
+import { useNavigate } from '@tanstack/react-router';
+import { api } from '@/lib/api';
 
 export function AppHeader() {
-  const { user } = Route.useRouteContext();
+  const { user, queryClient } = Route.useRouteContext();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await api.auth.logout.$post();
+
+      // Clear all queries in React Query cache
+      queryClient.clear();
+
+      // Navigate to home page
+      navigate({ to: '/' });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   return (
     <header className='border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='flex h-14 items-center justify-end gap-4 px-6'>
@@ -43,11 +60,9 @@ export function AppHeader() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <a href='/api/auth/logout'>
-                  <LogOut className='mr-2 h-4 w-4' />
-                  <span>Logout</span>
-                </a>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className='mr-2 h-4 w-4' />
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
