@@ -71,6 +71,8 @@ function ProjectPage() {
       await createTask(Number(projectId), {
         title: newTaskTitle,
         status: 'backlog',
+        size: 'm',
+        priority: 'medium',
       });
 
       queryClient.invalidateQueries({
