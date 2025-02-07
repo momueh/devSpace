@@ -22,11 +22,13 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  ClipboardCheck,
   Clock,
   Edit,
   Eye,
   EyeOff,
   FileLock,
+  ListOrdered,
   MessageSquare,
   Plus,
   Tag,
@@ -338,7 +340,7 @@ export function TaskDetailModal({
 
               <div className='space-y-2'>
                 <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                  <AlertCircle className='h-4 w-4' />
+                  <ClipboardCheck className='h-4 w-4' />
                   Status
                 </div>
                 <Select
@@ -360,7 +362,7 @@ export function TaskDetailModal({
 
               <div className='space-y-2'>
                 <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                  <Tag className='h-4 w-4' />
+                  <ListOrdered className='h-4 w-4' />
                   Priority
                 </div>
                 <Select

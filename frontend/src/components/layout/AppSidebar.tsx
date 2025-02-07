@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { CheckSquare, LayoutDashboard, Settings } from 'lucide-react';
+import { LayoutDashboard, ListTodo, Settings } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
 // Menu items.
@@ -26,7 +26,7 @@ const items = [
   {
     title: 'My DevSpace',
     url: '/my-devspace',
-    icon: CheckSquare,
+    icon: ListTodo,
   },
   {
     title: 'Settings',

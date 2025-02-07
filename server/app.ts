@@ -7,6 +7,7 @@ import { authRoute } from './routes/auth';
 import { projectRoute } from './routes/project';
 import { taskRoute } from './routes/task';
 import type { User } from './db/schema/user';
+import { searchRoute } from './routes/search';
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -35,7 +36,8 @@ const apiRoutes = app
   .route('/auth', authRoute)
   .route('/user', userRoute)
   .route('/project', projectRoute)
-  .route('/task', taskRoute);
+  .route('/task', taskRoute)
+  .route('/search', searchRoute);
 
 // Serve frontend for all other routes
 app.get('*', serveStatic({ root: './frontend/dist' }));

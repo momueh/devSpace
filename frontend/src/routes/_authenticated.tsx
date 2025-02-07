@@ -5,6 +5,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { BaseHeader } from '@/components/layout/BaseHeader';
+import { CommandMenu } from '@/components/CommandMenu';
 
 const UnauthenticatedBlocker = () => {
   return (
@@ -38,6 +39,7 @@ const AuthenticatedPage = () => {
 
   return (
     <SidebarProvider>
+      <CommandMenu />
       <div className='min-h-screen flex w-full bg-background'>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
