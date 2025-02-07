@@ -30,7 +30,21 @@ export const projectRoute = new Hono()
               )
           ),
         with: {
-          tasks: true,
+          tasks: {
+            with: {
+              assignee: true,
+              notes: {
+                with: {
+                  author: true,
+                },
+              },
+              comments: {
+                with: {
+                  author: true,
+                },
+              },
+            },
+          },
           members: {
             with: {
               user: true,
@@ -55,7 +69,21 @@ export const projectRoute = new Hono()
       const result = await db.query.project.findFirst({
         where: eq(project.id, id),
         with: {
-          tasks: true,
+          tasks: {
+            with: {
+              assignee: true,
+              notes: {
+                with: {
+                  author: true,
+                },
+              },
+              comments: {
+                with: {
+                  author: true,
+                },
+              },
+            },
+          },
           members: {
             with: {
               user: true,

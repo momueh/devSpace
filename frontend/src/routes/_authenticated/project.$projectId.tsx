@@ -222,6 +222,7 @@ function ProjectPage() {
           isOpen={!!selectedTask}
           onClose={() => setSelectedTask(null)}
           task={selectedTask}
+          projectMembers={project.members}
           onUpdate={handleUpdateTask}
           onDelete={handleDeleteTask}
         />

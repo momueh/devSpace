@@ -1,7 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
 import { Task } from '@server/sharedTypes';
 import { getPriorityDisplay, getSizeDisplay } from '@/lib/helpers';
 
@@ -53,7 +52,7 @@ export function TaskCard({
             </div>
           </div>
           {task.assignee && (
-            <Avatar className='h-6 w-6 shrink-0'>
+            <Avatar className='h-7 w-7 shrink-0'>
               <AvatarFallback className='text-xs bg-primary/10'>
                 {getInitials(task.assignee.firstname, task.assignee.lastname)}
               </AvatarFallback>
