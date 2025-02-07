@@ -2,6 +2,7 @@ import { hc } from 'hono/client';
 import { type ApiRoutes } from '@server/app';
 import { queryOptions } from '@tanstack/react-query';
 import { User } from '@server/db/schema/user';
+import { Task } from '@server/sharedTypes';
 
 const client = hc<ApiRoutes>('/');
 
@@ -46,24 +47,21 @@ export const getProjectQueryOptions = (projectId: number) =>
     staleTime: Infinity,
   });
 
-export async function createTask(
-  projectId: number,
-  task: { title: string; status: string }
-) {
+export async function createTask(projectId: number, task: Partial<Task>) {
   const res = await api.task.$post({
     json: {
       ...task,
-      projectId, // Include projectId in the task data
+      projectId, // task is always created in a project
     },
   });
   if (!res.ok) throw new Error('Failed to create task');
   return res.json();
 }
 
-export async function updateTask(taskId: number, updates: Partial<Task>) {
+export async function updateTask(taskId: number, task: Partial<Task>) {
   const res = await api.task[':id'].$patch({
     param: { id: taskId.toString() },
-    json: updates,
+    json: task,
   });
   if (!res.ok) throw new Error('Failed to update task');
   return res.json();

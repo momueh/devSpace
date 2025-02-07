@@ -16,12 +16,14 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { Task } from '@server/sharedTypes';
+import { BOARD_COLUMNS, TaskStatusDisplay } from '@/lib/helpers';
 
 interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   task: Task;
-  onUpdate: (taskId: number, updates: Partial<Task>) => Promise<void>;
+  onUpdate: (taskId: number, task: Partial<Task>) => Promise<void>;
   onDelete: (taskId: number) => Promise<void>;
 }
 
@@ -35,6 +37,7 @@ export function TaskDetailModal({
   const [title, setTitle] = useState(task.title);
   const [status, setStatus] = useState(task.status);
   const [priority, setPriority] = useState(task.priority);
+  const [size, setSize] = useState(task.size);
 
   const handleUpdate = async () => {
     try {
@@ -42,6 +45,7 @@ export function TaskDetailModal({
         title,
         status,
         priority,
+        size,
       });
       toast.success('Task updated successfully');
     } catch (error) {
@@ -83,10 +87,11 @@ export function TaskDetailModal({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='todo'>Todo</SelectItem>
-                <SelectItem value='in_progress'>In Progress</SelectItem>
-                <SelectItem value='review'>In Review</SelectItem>
-                <SelectItem value='done'>Done</SelectItem>
+                {BOARD_COLUMNS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {TaskStatusDisplay[status]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -98,10 +103,27 @@ export function TaskDetailModal({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='low'>Low</SelectItem>
-                <SelectItem value='medium'>Medium</SelectItem>
-                <SelectItem value='high'>High</SelectItem>
-                <SelectItem value='critical'>Critical</SelectItem>
+                {['low', 'medium', 'high', 'critical'].map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value.toUpperCase()}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='size'>Size</Label>
+            <Select value={size} onValueChange={setSize}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {['s', 'm', 'l', 'xl'].map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value.toUpperCase()}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

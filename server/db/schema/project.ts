@@ -1,14 +1,27 @@
-import { pgTable, serial, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  integer,
+  pgEnum,
+} from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { user } from './user';
+
+export const projectStatusEnum = pgEnum('project_status', [
+  'active',
+  'archived',
+  'completed',
+]);
 
 export const project = pgTable('project', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
   ownerId: integer('owner_id').references(() => user.id),
-  status: text('status').notNull().default('active'),
+  status: projectStatusEnum('status').notNull().default('active'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

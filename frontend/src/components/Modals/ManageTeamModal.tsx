@@ -103,6 +103,7 @@ export function ManageTeamModal({
                 <Input
                   id='email'
                   type='email'
+                  placeholder='Enter email address'
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
