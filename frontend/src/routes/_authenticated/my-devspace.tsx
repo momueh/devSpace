@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Task } from '@server/sharedTypes';
+import { Task, TaskPriority, TaskSize, TaskStatus } from '@server/sharedTypes';
 import { Link } from '@tanstack/react-router';
-import { MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import {
   ColumnDef,
@@ -37,24 +37,63 @@ import {
 } from '@/components/ui/table';
 import { getUserProjectsQueryOptions } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import {
+  getPriorityDisplay,
+  getSizeDisplay,
+  getStatusDisplay,
+  PRIORITY_ORDER,
+  SIZE_ORDER,
+  STATUS_ORDER,
+} from '@/lib/helpers';
 
 // Column definitions
 const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'id',
-    header: 'ID',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          ID
+          <ArrowUpDown className='ml-1 h-4 w-4' />
+        </Button>
+      );
+    },
+
     cell: ({ row }) => <div className='font-medium'>{row.getValue('id')}</div>,
   },
   {
     accessorKey: 'title',
-    header: 'Task',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Task
+          <ArrowUpDown className='ml-1 h-4 w-4' />
+        </Button>
+      );
+    },
     cell: ({ row }) => (
       <div className='font-medium'>{row.getValue('title')}</div>
     ),
   },
   {
     accessorKey: 'project',
-    header: 'Project',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Project
+          <ArrowUpDown className='ml-1 h-4 w-4' />
+        </Button>
+      );
+    },
     cell: ({ row }) => (
       <Link
         to='/project/$projectId'
@@ -67,9 +106,24 @@ const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Status
+          <ArrowUpDown className='ml-1 h-4 w-4' />
+        </Button>
+      );
+    },
+    sortingFn: (rowA, rowB) => {
+      const statusA = rowA.getValue('status') as TaskStatus;
+      const statusB = rowB.getValue('status') as TaskStatus;
+      return STATUS_ORDER[statusA] - STATUS_ORDER[statusB];
+    },
     cell: ({ row }) => {
-      const status = row.getValue('status') as string;
+      const status = row.getValue('status') as TaskStatus;
       return (
         <Badge
           variant='secondary'
@@ -80,25 +134,55 @@ const columns: ColumnDef<Task>[] = [
             status === 'done' && 'bg-green-100 text-green-700'
           )}
         >
-          {status}
+          {getStatusDisplay(status)}
         </Badge>
       );
     },
   },
   {
     accessorKey: 'priority',
-    header: 'Priority',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Priority
+          <ArrowUpDown className='ml-1 h-4 w-4' />
+        </Button>
+      );
+    },
+    sortingFn: (rowA, rowB) => {
+      const priorityA = rowA.getValue('priority') as TaskPriority;
+      const priorityB = rowB.getValue('priority') as TaskPriority;
+      return PRIORITY_ORDER[priorityA] - PRIORITY_ORDER[priorityB];
+    },
     cell: ({ row }) => {
-      const priority = row.getValue('priority') as string;
-      return <Badge variant='secondary'>{priority}</Badge>;
+      const priority = row.getValue('priority') as TaskPriority;
+      return <Badge variant='secondary'>{getPriorityDisplay(priority)}</Badge>;
     },
   },
   {
     accessorKey: 'size',
-    header: 'Size',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Size
+          <ArrowUpDown className='ml-1 h-4 w-4' />
+        </Button>
+      );
+    },
+    sortingFn: (rowA, rowB) => {
+      const sizeA = rowA.getValue('size') as TaskSize;
+      const sizeB = rowB.getValue('size') as TaskSize;
+      return SIZE_ORDER[sizeA] - SIZE_ORDER[sizeB];
+    },
     cell: ({ row }) => {
-      const size = row.getValue('size') as string;
-      return <Badge variant='secondary'>{size}</Badge>;
+      const size = row.getValue('size') as TaskSize;
+      return <Badge variant='secondary'>{getSizeDisplay(size)}</Badge>;
     },
   },
   {
@@ -258,7 +342,7 @@ function MyDevSpace() {
   console.log('tasks', tasks);
 
   return (
-    <div className='space-y-6'>
+    <div className='p-4'>
       <div>
         <h1 className='text-3xl font-bold tracking-tight pb-4'>My DevSpace</h1>
         <p className='text-muted-foreground'>

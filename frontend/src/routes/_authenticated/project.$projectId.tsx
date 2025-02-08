@@ -113,7 +113,7 @@ function ProjectPage() {
 
   return (
     <div className='flex flex-col h-[calc(100vh-4rem)]'>
-      <div className='flex items-center justify-between p-6'>
+      <div className='flex items-center justify-between p-4'>
         <div className='space-y-1'>
           <h1 className='text-3xl font-bold tracking-tight'>{project.name}</h1>
           {project.description && (
