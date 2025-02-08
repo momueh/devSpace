@@ -52,19 +52,26 @@ export interface Project {
 
 export type Permission = (typeof Permissions)[keyof typeof Permissions];
 export interface ProjectPermissions {
-  manage_project: boolean;
-  manage_team: boolean;
-  view_billing: boolean;
+  create_project: boolean;
+  edit_project: boolean;
+  delete_project: boolean;
+  invite_to_project: boolean;
+
   create_task: boolean;
   edit_task: boolean;
   delete_task: boolean;
   assign_task: boolean;
-  view_tasks: boolean;
+
   create_comment: boolean;
-  manage_comments: boolean;
-  manage_notes: boolean;
-  access_dev_space: boolean;
-  view_metrics: boolean;
+  edit_comment: boolean;
+  delete_comment: boolean;
+
+  view_note: boolean;
+  create_note: boolean;
+  edit_note: boolean;
+  delete_note: boolean;
+
+  view_own_dev_space: boolean;
 }
 export interface AuthenticatedUser extends User {
   projectPermissions: Record<number, ProjectPermissions>;

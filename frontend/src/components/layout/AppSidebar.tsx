@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, ListTodo, Settings } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { Route } from '@/routes/_authenticated';
 
 // Menu items.
 const items = [
@@ -27,6 +28,7 @@ const items = [
     title: 'My DevSpace',
     url: '/my-devspace',
     icon: ListTodo,
+    requiresPermission: 'view_own_dev_space',
   },
   {
     title: 'Settings',
@@ -36,6 +38,23 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { user } = Route.useRouteContext();
+
+  // Check if user has view_own_dev_space permission in any project
+  const canViewOwnDevSpace = user?.projectPermissions
+    ? Object.values(user.projectPermissions).some(
+        (projectPermissions) => projectPermissions['view_own_dev_space']
+      )
+    : false;
+
+  // Filter items based on permissions
+  const filteredItems = items.filter((item) => {
+    if (item.requiresPermission === 'view_own_dev_space') {
+      return canViewOwnDevSpace;
+    }
+    return true;
+  });
+
   return (
     <Sidebar>
       <SidebarContent className='bg-gradient-to-b from-blue-200 to-white-50'>
@@ -52,7 +71,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link to={item.url}>
