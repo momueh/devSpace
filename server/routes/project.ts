@@ -7,6 +7,7 @@ import { requireAuth } from '../auth/middleware';
 import { projectMember, ProjectRole } from '../db/schema/projectMember';
 import { sendEmail } from '../email';
 import { user } from '../db/schema/user';
+import { projectRole, ProjectRoleType } from '../db/schema/projectRole';
 
 export const projectRoute = new Hono()
   .use('/*', requireAuth)
@@ -118,11 +119,19 @@ export const projectRoute = new Hono()
         .values(validatedData)
         .returning();
 
-      // Add creator as project owner
+      // Get the owner role ID
+      const ownerRole = await db.query.projectRole.findFirst({
+        where: eq(projectRole.name, ProjectRoleType.OWNER),
+      });
+      if (!ownerRole) {
+        throw new Error('Owner role not found');
+      }
+
+      // Add creator as project owner with the correct role ID
       await db.insert(projectMember).values({
         projectId: newProject.id,
         userId: user.id,
-        role: ProjectRole.OWNER,
+        roleId: ownerRole.id,
       });
 
       return c.json(newProject);
@@ -184,7 +193,7 @@ export const projectRoute = new Hono()
   // Add member to project
   .post('/:id/members', async (c) => {
     const projectId = Number(c.req.param('id'));
-    const { email, role } = await c.req.json();
+    const { email, roleName } = await c.req.json();
     const currentUser = c.var.user;
 
     try {
@@ -193,9 +202,11 @@ export const projectRoute = new Hono()
         where: (members, { and, eq }) =>
           and(
             eq(members.projectId, projectId),
-            eq(members.userId, currentUser.id),
-            eq(members.role, ProjectRole.OWNER)
+            eq(members.userId, currentUser.id)
           ),
+        with: {
+          role: true,
+        },
       });
 
       if (!member) {
@@ -210,14 +221,22 @@ export const projectRoute = new Hono()
       if (!invitedUser) {
         return c.json({ error: 'User not found' }, 404);
       }
+      // Get the role ID for the specified role name
+      const role = await db.query.projectRole.findFirst({
+        where: eq(projectRole.name, roleName),
+      });
 
-      // Add member
+      if (!role) {
+        return c.json({ error: 'Invalid role' }, 400);
+      }
+
+      // Add member with the correct role ID
       const [newMember] = await db
         .insert(projectMember)
         .values({
           projectId,
           userId: invitedUser.id,
-          role,
+          roleId: role.id,
         })
         .returning();
 

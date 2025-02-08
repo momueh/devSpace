@@ -6,6 +6,9 @@ import { note } from './note';
 import { comment } from './comment';
 import { session } from './session';
 import { projectMember } from './projectMember';
+import { projectRolePermission } from './projectRolePermission';
+import { projectRole } from './projectRole';
+import { permission } from './permission';
 
 export const userRelations = relations(user, ({ many }) => ({
   ownedProjects: many(project),
@@ -67,6 +70,32 @@ export const sessionRelations = relations(session, ({ one }) => ({
   }),
 }));
 
+export const projectRoleRelations = relations(projectRole, ({ one, many }) => ({
+  inheritsFromRole: one(projectRole, {
+    fields: [projectRole.inheritsFrom],
+    references: [projectRole.id],
+  }),
+  permissions: many(projectRolePermission),
+}));
+
+export const permissionRelations = relations(permission, ({ many }) => ({
+  roles: many(projectRolePermission),
+}));
+
+export const projectRolePermissionRelations = relations(
+  projectRolePermission,
+  ({ one }) => ({
+    role: one(projectRole, {
+      fields: [projectRolePermission.roleId],
+      references: [projectRole.id],
+    }),
+    permission: one(permission, {
+      fields: [projectRolePermission.permissionId],
+      references: [permission.id],
+    }),
+  })
+);
+
 export const projectMemberRelations = relations(projectMember, ({ one }) => ({
   user: one(user, {
     fields: [projectMember.userId],
@@ -75,5 +104,9 @@ export const projectMemberRelations = relations(projectMember, ({ one }) => ({
   project: one(project, {
     fields: [projectMember.projectId],
     references: [project.id],
+  }),
+  role: one(projectRole, {
+    fields: [projectMember.roleId],
+    references: [projectRole.id],
   }),
 }));

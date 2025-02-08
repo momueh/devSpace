@@ -74,11 +74,6 @@ export function CommandMenu() {
     }
   };
 
-  console.log('Current search state:', {
-    query: searchQuery,
-    results: searchResults,
-  });
-
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput

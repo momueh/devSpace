@@ -60,6 +60,7 @@ export const Route = createFileRoute('/_authenticated')({
 
     try {
       const data = await queryClient.fetchQuery(userQueryOptions);
+      console.log('auth me', data);
       return data;
     } catch (e) {
       console.error(e);

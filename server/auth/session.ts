@@ -7,6 +7,7 @@ import {
 import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { session } from '../db/schema/session';
+import { getUserProjectPermissions } from '../utils/permissionUtils';
 
 const SESSION_REFRESH_INTERVAL_MS = 1000 * 60 * 60 * 24 * 15; // 15 days
 const SESSION_MAX_DURATION_MS = SESSION_REFRESH_INTERVAL_MS * 2; // 30 days
@@ -68,8 +69,15 @@ export const validateSession = async (sessionToken: string) => {
       .where(eq(session.id, sessionId));
     sessionData.expiresAt = newExpiresAt;
   }
+  // Get project permissions
+  const projectPermissions = await getUserProjectPermissions(sessionUser.id);
+  // Add project permissions to user object
+  const authenticatedUser = {
+    ...sessionUser,
+    projectPermissions,
+  };
 
-  return { session: sessionData, user: sessionUser };
+  return { session: sessionData, user: authenticatedUser };
 };
 
 export const invalidateSession = async (sessionId: string) => {

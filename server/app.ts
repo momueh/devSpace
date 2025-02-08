@@ -6,12 +6,12 @@ import { userRoute } from './routes/user';
 import { authRoute } from './routes/auth';
 import { projectRoute } from './routes/project';
 import { taskRoute } from './routes/task';
-import type { User } from './db/schema/user';
 import { searchRoute } from './routes/search';
+import type { AuthenticatedUser } from './sharedTypes';
 
 declare module 'hono' {
   interface ContextVariableMap {
-    user: User;
+    user: AuthenticatedUser;
   }
 }
 

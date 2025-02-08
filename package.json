@@ -6,6 +6,7 @@
     "start": "bun server/index.ts",
     "dev": "bun --watch server/index.ts",
     "migrate:dev": "bun migrate.ts",
+    "seed:dev": "bun server/db/seed.ts",
     "studio:dev": "bun drizzle-kit studio"
   },
   "devDependencies": {

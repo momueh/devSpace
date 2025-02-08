@@ -10,6 +10,7 @@ import {
 } from '../auth/session';
 import { getAuth } from '../auth/middleware';
 import { setSessionCookie, deleteSessionCookie } from '../auth/cookie';
+import { getUserProjectPermissions } from '../utils/permissionUtils';
 
 export const authRoute = new Hono()
   .post('/register', async (c) => {
@@ -78,5 +79,6 @@ export const authRoute = new Hono()
   })
   .get('/me', async (c) => {
     const { user } = await getAuth(c);
+
     return c.json({ user });
   });

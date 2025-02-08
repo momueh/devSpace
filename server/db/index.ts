@@ -4,8 +4,11 @@ import postgres from 'postgres';
 import {
   commentRelations,
   noteRelations,
+  permissionRelations,
   projectMemberRelations,
   projectRelations,
+  projectRolePermissionRelations,
+  projectRoleRelations,
   sessionRelations,
   taskRelations,
   userRelations,
@@ -17,6 +20,9 @@ import { task } from './schema/task';
 import { project } from './schema/project';
 import { session } from './schema/session';
 import { projectMember } from './schema/projectMember';
+import { permission } from './schema/permission';
+import { projectRolePermission } from './schema/projectRolePermission';
+import { projectRole } from './schema/projectRole';
 
 // combine all schemas into one object
 const schema = {
@@ -24,6 +30,9 @@ const schema = {
   user,
   project,
   projectMember,
+  projectRole,
+  permission,
+  projectRolePermission,
   task,
   note,
   comment,
@@ -32,6 +41,9 @@ const schema = {
   userRelations,
   projectRelations,
   projectMemberRelations,
+  projectRoleRelations,
+  permissionRelations,
+  projectRolePermissionRelations,
   taskRelations,
   noteRelations,
   commentRelations,
