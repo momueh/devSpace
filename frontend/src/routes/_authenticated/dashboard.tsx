@@ -58,7 +58,7 @@ function Dashboard() {
         Welcome back, {user?.firstname}!
       </h2>
       <p className='text-muted-foreground'>
-        You have {inProgressTasksOfUser}{' '}
+        You have <strong>{inProgressTasksOfUser}</strong>{' '}
         {inProgressTasksOfUser === 1 ? 'task' : 'tasks'} in progress across your
         projects.
       </p>

@@ -38,9 +38,13 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarContent>
-        <div className='flex h-14 items-center border-b px-6'>
-          <Link to='/' className='flex items-center gap-2 font-semibold'>
+      <SidebarContent className='bg-gradient-to-b from-blue-200 to-white-50'>
+        <div className='flex h-14 items-center border-b border-gray-400  px-6'>
+          <Link
+            to='/dashboard'
+            className='flex items-center gap-2 font-semibold'
+          >
+            <img src='/logo.svg' alt='DevSpace Logo' className='h-8 w-auto' />
             <span className='text-xl'>DevSpace</span>
           </Link>
         </div>
