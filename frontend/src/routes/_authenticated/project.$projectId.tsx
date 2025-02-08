@@ -2,10 +2,9 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-import { Edit, Plus, Users } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -26,6 +25,15 @@ import { TaskCard } from '@/components/TaskCard';
 import { cn } from '@/lib/utils';
 import { Task } from '@server/sharedTypes';
 import { BOARD_COLUMNS, getStatusDisplay } from '@/lib/helpers';
+import ProjectKnowledge, {
+  EmptyResources,
+} from '@/components/ProjectKnowledge';
+import { AddResourceModal } from '@/components/Modals/AddResourceModal';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
@@ -48,6 +56,9 @@ function ProjectPage() {
 
   const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
   const [isManageTeamModalOpen, setIsManageTeamModalOpen] = useState(false);
+  const [isAddResourceModalOpen, setIsAddResourceModalOpen] = useState(false);
+
+  const [isResourcesOpen, setIsResourcesOpen] = useState(true);
 
   const {
     data: project,
@@ -127,7 +138,7 @@ function ProjectPage() {
   };
 
   return (
-    <div className='flex flex-col h-[calc(100vh-4rem)]'>
+    <div className='flex flex-col h-[calc(100vh-105px)]'>
       <div className='flex items-center justify-between p-4'>
         <div className='space-y-1'>
           <h1 className='text-3xl font-bold tracking-tight'>{project.name}</h1>
@@ -147,28 +158,51 @@ function ProjectPage() {
         </div>
       </div>
 
-      <div className='flex-1 overflow-hidden'>
-        <div className='p-6 py-8'>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleCreateTask();
-            }}
-            className='flex gap-2 items-center max-w-md'
-          >
-            <Input
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              placeholder='Add new task ...'
-            />
-            <Button type='submit' size='icon'>
+      <div className='px-4 mx-2  py-6 border-2 border-gray-100 rounded-xl'>
+        <Collapsible
+          defaultOpen
+          open={isResourcesOpen}
+          onOpenChange={setIsResourcesOpen}
+        >
+          <div className='flex items-center gap-8'>
+            <h2 className='text-md font-semibold'>Project Resources</h2>
+
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => setIsAddResourceModalOpen(true)}
+            >
               <Plus className='h-4 w-4' />
             </Button>
-          </form>
-        </div>
+            <CollapsibleTrigger asChild>
+              <Button variant='ghost' size='sm' className='ml-auto'>
+                {isResourcesOpen ? (
+                  <ChevronUp className='h-4 w-4' />
+                ) : (
+                  <ChevronDown className='h-4 w-4' />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent className='pt-4'>
+            {project.resources.length === 0 ? (
+              <EmptyResources
+                onCreateClick={() => setIsAddResourceModalOpen(true)}
+              />
+            ) : (
+              <ProjectKnowledge
+                projectId={Number(projectId)}
+                resources={project.resources || []}
+              />
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
 
+      <h2 className='px-4 py-6 text-lg font-semibold'>Kanban</h2>
+      <div className='flex-1 overflow-hidden'>
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className='grid grid-cols-4 gap-4 p-6 pt-0 h-[calc(100%-80px)]'>
+          <div className='grid grid-cols-4 gap-4 p-4 pt-0 h-[calc(100%-80px)]'>
             {columns.map((column) => (
               <div key={column} className='flex flex-col h-full'>
                 <div className='flex items-center justify-between mb-4'>
@@ -190,6 +224,7 @@ function ProjectPage() {
                     }
                   </Badge>
                 </div>
+
                 <Droppable droppableId={column}>
                   {(provided) => (
                     <div
@@ -230,6 +265,25 @@ function ProjectPage() {
             ))}
           </div>
         </DragDropContext>
+
+        <div className='p-6 py-8'>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateTask();
+            }}
+            className='flex gap-2 items-center max-w-md'
+          >
+            <Input
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder='Add new task ...'
+            />
+            <Button type='submit' size='icon'>
+              <Plus className='h-4 w-4' />
+            </Button>
+          </form>
+        </div>
       </div>
 
       {selectedTask && (
@@ -253,6 +307,12 @@ function ProjectPage() {
         onClose={() => setIsManageTeamModalOpen(false)}
         projectId={Number(projectId)}
         members={project.members}
+      />
+
+      <AddResourceModal
+        isOpen={isAddResourceModalOpen}
+        onClose={() => setIsAddResourceModalOpen(false)}
+        projectId={projectId}
       />
     </div>
   );

@@ -48,6 +48,7 @@ export interface Project {
     };
     role: string;
   }>;
+  resources?: ResourceLink[];
 }
 
 export type Permission = (typeof Permissions)[keyof typeof Permissions];
@@ -75,4 +76,13 @@ export interface ProjectPermissions {
 }
 export interface AuthenticatedUser extends User {
   projectPermissions: Record<number, ProjectPermissions>;
+}
+
+export type ResourceVisibility = 'private' | 'team' | 'public';
+export interface ResourceLink {
+  id: string;
+  title: string;
+  url: string;
+  visibility: ResourceVisibility;
+  isPinned: boolean;
 }

@@ -30,7 +30,7 @@ export function AppHeader() {
     }
   };
   return (
-    <header className='border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <header className='border-b border-gray-300 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='flex h-14 items-center justify-end gap-4 px-6'>
         <div className='flex items-center gap-8'>
           <Button

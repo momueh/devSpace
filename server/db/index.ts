@@ -7,6 +7,7 @@ import {
   permissionRelations,
   projectMemberRelations,
   projectRelations,
+  projectResourceRelations,
   projectRolePermissionRelations,
   projectRoleRelations,
   sessionRelations,
@@ -23,6 +24,7 @@ import { projectMember } from './schema/projectMember';
 import { permission } from './schema/permission';
 import { projectRolePermission } from './schema/projectRolePermission';
 import { projectRole } from './schema/projectRole';
+import { projectResource } from './schema/projectResource';
 
 // combine all schemas into one object
 const schema = {
@@ -33,6 +35,7 @@ const schema = {
   projectRole,
   permission,
   projectRolePermission,
+  projectResource,
   task,
   note,
   comment,
@@ -44,6 +47,7 @@ const schema = {
   projectRoleRelations,
   permissionRelations,
   projectRolePermissionRelations,
+  projectResourceRelations,
   taskRelations,
   noteRelations,
   commentRelations,

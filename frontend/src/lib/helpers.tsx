@@ -1,4 +1,10 @@
-import { TaskPriority, TaskSize, TaskStatus } from '@server/sharedTypes';
+import {
+  ResourceVisibility,
+  TaskPriority,
+  TaskSize,
+  TaskStatus,
+} from '@server/sharedTypes';
+import { Globe, Users, Lock } from 'lucide-react';
 
 export const TaskStatusDisplay: Record<TaskStatus, string> = {
   backlog: 'Backlog',
@@ -48,3 +54,14 @@ export const STATUS_ORDER: Record<TaskStatus, number> = {
   in_review: 2,
   done: 3,
 } as const;
+
+export const getVisibilityIcon = (visibility: ResourceVisibility) => {
+  switch (visibility) {
+    case 'private':
+      return <Lock className='h-4 w-4' />;
+    case 'team':
+      return <Users className='h-4 w-4' />;
+    case 'public':
+      return <Globe className='h-4 w-4' />;
+  }
+};

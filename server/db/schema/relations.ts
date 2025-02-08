@@ -9,6 +9,7 @@ import { projectMember } from './projectMember';
 import { projectRolePermission } from './projectRolePermission';
 import { projectRole } from './projectRole';
 import { permission } from './permission';
+import { projectResource } from './projectResource';
 
 export const userRelations = relations(user, ({ many }) => ({
   ownedProjects: many(project),
@@ -25,6 +26,7 @@ export const projectRelations = relations(project, ({ one, many }) => ({
   }),
   tasks: many(task),
   members: many(projectMember),
+  resources: many(projectResource),
 }));
 
 export const taskRelations = relations(task, ({ one, many }) => ({
@@ -110,3 +112,13 @@ export const projectMemberRelations = relations(projectMember, ({ one }) => ({
     references: [projectRole.id],
   }),
 }));
+
+export const projectResourceRelations = relations(
+  projectResource,
+  ({ one }) => ({
+    project: one(project, {
+      fields: [projectResource.projectId],
+      references: [project.id],
+    }),
+  })
+);

@@ -1,13 +1,17 @@
 import { Hono } from 'hono';
 import { db } from '../db';
 import { project } from '../db/schema/project';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { insertProjectSchema } from '../db/schema/project';
 import { requireAuth } from '../auth/middleware';
 import { projectMember, ProjectRole } from '../db/schema/projectMember';
 import { sendEmail } from '../email';
 import { user } from '../db/schema/user';
 import { projectRole, ProjectRoleType } from '../db/schema/projectRole';
+import {
+  insertProjectResourceSchema,
+  projectResource,
+} from '../db/schema/projectResource';
 
 export const projectRoute = new Hono()
   .use('/*', requireAuth)
@@ -89,6 +93,12 @@ export const projectRoute = new Hono()
             with: {
               user: true,
             },
+          },
+          resources: {
+            orderBy: [
+              desc(projectResource.isPinned),
+              desc(projectResource.createdAt),
+            ],
           },
         },
       });
@@ -249,5 +259,112 @@ export const projectRoute = new Hono()
       return c.json(newMember);
     } catch (error) {
       return c.json({ error: 'Failed to add member' }, 500);
+    }
+  })
+
+  // Get project resources
+  .get('/:id/resources', async (c) => {
+    const projectId = Number(c.req.param('id'));
+    const user = c.var.user;
+
+    try {
+      const projectResult = await db.query.project.findFirst({
+        where: eq(project.id, projectId),
+      });
+
+      if (!projectResult) {
+        return c.json({ error: 'Project not found' }, 404);
+      }
+
+      const resources = await db.query.projectResource.findMany({
+        where: eq(projectResource.projectId, projectId),
+        orderBy: [
+          desc(projectResource.isPinned),
+          desc(projectResource.createdAt),
+        ],
+      });
+
+      return c.json(resources);
+    } catch (error) {
+      return c.json({ error: 'Failed to fetch resources' }, 500);
+    }
+  })
+
+  // Create project resource
+  .post('/:id/resources', async (c) => {
+    const projectId = Number(c.req.param('id'));
+    const data = await c.req.json();
+
+    try {
+      const validatedData = insertProjectResourceSchema.parse({
+        ...data,
+        projectId,
+      });
+
+      const [newResource] = await db
+        .insert(projectResource)
+        .values(validatedData)
+        .returning();
+
+      return c.json(newResource);
+    } catch (error) {
+      return c.json({ error: 'Failed to create resource' }, 500);
+    }
+  })
+
+  // Delete project resource
+  .delete('/:projectId/resources/:resourceId', async (c) => {
+    const projectId = Number(c.req.param('projectId'));
+    const resourceId = Number(c.req.param('resourceId'));
+
+    try {
+      const resource = await db.query.projectResource.findFirst({
+        where: and(
+          eq(projectResource.id, resourceId),
+          eq(projectResource.projectId, projectId)
+        ),
+      });
+
+      if (!resource) {
+        return c.json({ error: 'Resource not found' }, 404);
+      }
+
+      await db
+        .delete(projectResource)
+        .where(eq(projectResource.id, resourceId));
+
+      return c.json({ success: true });
+    } catch (error) {
+      return c.json({ error: 'Failed to delete resource' }, 500);
+    }
+  })
+
+  // Toggle pin status
+  .patch('/:projectId/resources/:resourceId/toggle-pin', async (c) => {
+    const projectId = Number(c.req.param('projectId'));
+    const resourceId = Number(c.req.param('resourceId'));
+
+    try {
+      const [resource] = await db
+        .update(projectResource)
+        .set({
+          isPinned: sql`NOT ${projectResource.isPinned}`,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(projectResource.id, resourceId),
+            eq(projectResource.projectId, projectId)
+          )
+        )
+        .returning();
+
+      if (!resource) {
+        return c.json({ error: 'Resource not found' }, 404);
+      }
+
+      return c.json(resource);
+    } catch (error) {
+      return c.json({ error: 'Failed to toggle pin status' }, 500);
     }
   });
