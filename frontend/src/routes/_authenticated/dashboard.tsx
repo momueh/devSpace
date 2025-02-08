@@ -29,15 +29,39 @@ function EmptyProjects({ onCreateClick }: { onCreateClick: () => void }) {
 function Dashboard() {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const { data: projects } = useSuspenseQuery(getUserProjectsQueryOptions());
+  const { user } = Route.useRouteContext();
+
+  // Calculate in-progress tasks assigned to user across all projects
+  const inProgressTasksOfUser = projects.reduce((count, project) => {
+    return (
+      count +
+      project.tasks.filter(
+        (task) =>
+          task.status === 'in_progress' && task.assignee?.id === user?.id
+      ).length
+    );
+  }, 0);
+
+  console.log('inProgressTasks', inProgressTasksOfUser);
 
   return (
     <div className='space-y-6'>
       <div className='flex justify-between items-center'>
         <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
+
         <Button onClick={() => setIsProjectModalOpen(true)}>
           Create Project
         </Button>
       </div>
+      <h2 className='text-xl font-bold tracking-tight'>
+        {' '}
+        Welcome back, {user?.firstname}!
+      </h2>
+      <p className='text-muted-foreground'>
+        You have {inProgressTasksOfUser}{' '}
+        {inProgressTasksOfUser === 1 ? 'task' : 'tasks'} in progress across your
+        projects.
+      </p>
       {projects.length === 0 ? (
         <EmptyProjects onCreateClick={() => setIsProjectModalOpen(true)} />
       ) : (
