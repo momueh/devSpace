@@ -50,35 +50,6 @@ export interface Project {
   }>;
 }
 
-// Define known permissions as constants
-export const Permissions = {
-  // Project Management
-  CREATE_PROJECT: 'create_project',
-  EDIT_PROJECT: 'edit_project',
-  DELETE_PROJECT: 'delete_project',
-  INVITE_TO_PROJECT: 'invite_to_project',
-
-  // Task Management
-  CREATE_TASK: 'create_task',
-  EDIT_TASK: 'edit_task',
-  DELETE_TASK: 'delete_task',
-  ASSIGN_TASK: 'assign_task',
-
-  // Comments & Notes
-  CREATE_COMMENT: 'create_comment',
-  EDIT_COMMENT: 'edit_comment',
-  DELETE_COMMENT: 'delete_comment',
-
-  // Task Notes
-  VIEW_NOTE: 'view_note',
-  CREATE_NOTE: 'create_note',
-  EDIT_NOTE: 'edit_note',
-  DELETE_NOTE: 'delete_note',
-
-  // Developer Features
-  VIEW_OWN_DEV_SPACE: 'view_own_dev_space',
-} as const;
-
 export type Permission = (typeof Permissions)[keyof typeof Permissions];
 export interface ProjectPermissions {
   manage_project: boolean;
