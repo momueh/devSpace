@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { Input } from '@/components/ui/input';
@@ -24,17 +24,23 @@ import { TaskDetailModal } from '@/components/Modals/TaskDetailModal';
 import { ManageTeamModal } from '@/components/Modals/ManageTeamModal';
 import { TaskCard } from '@/components/TaskCard';
 import { cn } from '@/lib/utils';
-import { Task, TaskStatus } from '@server/sharedTypes';
+import { Task } from '@server/sharedTypes';
 import { BOARD_COLUMNS, getStatusDisplay } from '@/lib/helpers';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
     queryClient.ensureQueryData(getProjectQueryOptions(Number(projectId))),
   component: ProjectPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      taskId: search.taskId ? Number(search.taskId) : undefined,
+    };
+  },
 });
 
 function ProjectPage() {
   const { projectId } = Route.useParams();
+  const { taskId } = Route.useSearch();
   const queryClient = Route.useRouteContext().queryClient;
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -48,6 +54,15 @@ function ProjectPage() {
     isLoading,
     isError,
   } = useSuspenseQuery(getProjectQueryOptions(Number(projectId)));
+
+  useEffect(() => {
+    if (taskId && project.tasks) {
+      const task = project.tasks.find((t) => t.id === taskId);
+      if (task) {
+        setSelectedTask(task);
+      }
+    }
+  }, [taskId, project.tasks]);
 
   if (isLoading) {
     return <LoadingSpinner />;

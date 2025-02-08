@@ -55,6 +55,7 @@ const columns: ColumnDef<Task>[] = [
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='p-0 w-full justify-start'
         >
           ID
           <ArrowUpDown className='ml-1 h-4 w-4' />
@@ -71,6 +72,7 @@ const columns: ColumnDef<Task>[] = [
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='p-0 w-full justify-start'
         >
           Task
           <ArrowUpDown className='ml-1 h-4 w-4' />
@@ -78,7 +80,14 @@ const columns: ColumnDef<Task>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className='font-medium'>{row.getValue('title')}</div>
+      <Link
+        to='/project/$projectId'
+        params={{ projectId: row.original.projectId.toString() }}
+        search={{ taskId: row.original.id }}
+        className='text-blue-500 hover:underline'
+      >
+        {row.getValue('title')}
+      </Link>
     ),
   },
   {
@@ -88,6 +97,7 @@ const columns: ColumnDef<Task>[] = [
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='p-0 w-full justify-start'
         >
           Project
           <ArrowUpDown className='ml-1 h-4 w-4' />
@@ -111,6 +121,7 @@ const columns: ColumnDef<Task>[] = [
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='p-0 w-full justify-start'
         >
           Status
           <ArrowUpDown className='ml-1 h-4 w-4' />
@@ -146,6 +157,7 @@ const columns: ColumnDef<Task>[] = [
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='p-0 w-full justify-start'
         >
           Priority
           <ArrowUpDown className='ml-1 h-4 w-4' />
@@ -169,6 +181,7 @@ const columns: ColumnDef<Task>[] = [
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='p-0 w-full justify-start'
         >
           Size
           <ArrowUpDown className='ml-1 h-4 w-4' />
@@ -206,7 +219,15 @@ const columns: ColumnDef<Task>[] = [
               Copy task ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View task details</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                to='/project/$projectId'
+                params={{ projectId: task.projectId.toString() }}
+                search={{ taskId: task.id }}
+              >
+                View task details
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
