@@ -83,3 +83,14 @@ export const updateUser = async (userId: number, data: Partial<User>) => {
   if (!res.ok) throw new Error('Failed to update user');
   return res.json();
 };
+
+export async function deleteResource(projectId: number, resourceId: number) {
+  const res = await api.project[':projectId'].resource[':resourceId'].$delete({
+    param: {
+      projectId: projectId.toString(),
+      resourceId: resourceId.toString(),
+    },
+  });
+  if (!res.ok) throw new Error('Failed to delete resource');
+  return res.json();
+}

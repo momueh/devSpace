@@ -313,7 +313,7 @@ export const projectRoute = new Hono()
   })
 
   // Delete project resource
-  .delete('/:projectId/resources/:resourceId', async (c) => {
+  .delete('/:projectId/resource/:resourceId', async (c) => {
     const projectId = Number(c.req.param('projectId'));
     const resourceId = Number(c.req.param('resourceId'));
 

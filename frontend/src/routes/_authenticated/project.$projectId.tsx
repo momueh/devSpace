@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-import { ChevronDown, ChevronUp, Edit, Plus, Users } from 'lucide-react';
+import { Edit, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import { Badge } from '@/components/ui/badge';
@@ -25,15 +25,8 @@ import { TaskCard } from '@/components/TaskCard';
 import { cn } from '@/lib/utils';
 import { Task } from '@server/sharedTypes';
 import { BOARD_COLUMNS, getStatusDisplay } from '@/lib/helpers';
-import ProjectKnowledge, {
-  EmptyResources,
-} from '@/components/ProjectKnowledge';
+import ProjectKnowledge from '@/components/ProjectKnowledge';
 import { AddResourceModal } from '@/components/Modals/AddResourceModal';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 
 export const Route = createFileRoute('/_authenticated/project/$projectId')({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
@@ -57,8 +50,6 @@ function ProjectPage() {
   const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
   const [isManageTeamModalOpen, setIsManageTeamModalOpen] = useState(false);
   const [isAddResourceModalOpen, setIsAddResourceModalOpen] = useState(false);
-
-  const [isResourcesOpen, setIsResourcesOpen] = useState(true);
 
   const {
     data: project,
@@ -106,7 +97,7 @@ function ProjectPage() {
       });
       setNewTaskTitle('');
       toast.success('Task created successfully');
-    } catch (error) {
+    } catch {
       toast.error('Failed to create task');
     }
   };
@@ -132,7 +123,7 @@ function ProjectPage() {
         status: result.destination.droppableId,
       });
       toast.success(`Task moved to ${result.destination.droppableId}`);
-    } catch (error) {
+    } catch {
       toast.error('Failed to move task');
     }
   };
@@ -158,46 +149,11 @@ function ProjectPage() {
         </div>
       </div>
 
-      <div className='px-4 mx-2  py-6 border-2 border-gray-100 rounded-xl'>
-        <Collapsible
-          defaultOpen
-          open={isResourcesOpen}
-          onOpenChange={setIsResourcesOpen}
-        >
-          <div className='flex items-center gap-8'>
-            <h2 className='text-md font-semibold'>Project Resources</h2>
-
-            <Button
-              variant='outline'
-              size='icon'
-              onClick={() => setIsAddResourceModalOpen(true)}
-            >
-              <Plus className='h-4 w-4' />
-            </Button>
-            <CollapsibleTrigger asChild>
-              <Button variant='ghost' size='sm' className='ml-auto'>
-                {isResourcesOpen ? (
-                  <ChevronUp className='h-4 w-4' />
-                ) : (
-                  <ChevronDown className='h-4 w-4' />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent className='pt-4'>
-            {project.resources.length === 0 ? (
-              <EmptyResources
-                onCreateClick={() => setIsAddResourceModalOpen(true)}
-              />
-            ) : (
-              <ProjectKnowledge
-                projectId={Number(projectId)}
-                resources={project.resources || []}
-              />
-            )}
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
+      <ProjectKnowledge
+        projectId={Number(projectId)}
+        resources={project.resources}
+        setIsAddResourceModalOpen={setIsAddResourceModalOpen}
+      />
 
       <h2 className='px-4 py-6 text-lg font-semibold'>Kanban</h2>
       <div className='flex-1 overflow-hidden'>
@@ -308,11 +264,10 @@ function ProjectPage() {
         projectId={Number(projectId)}
         members={project.members}
       />
-
       <AddResourceModal
         isOpen={isAddResourceModalOpen}
         onClose={() => setIsAddResourceModalOpen(false)}
-        projectId={projectId}
+        projectId={Number(projectId)}
       />
     </div>
   );
