@@ -65,3 +65,7 @@ export const getVisibilityIcon = (visibility: ResourceVisibility) => {
       return <Globe className='h-4 w-4' />;
   }
 };
+
+export const getInitials = (firstname: string, lastname: string) => {
+  return `${firstname[0]}${lastname[0]}`.toUpperCase();
+};
