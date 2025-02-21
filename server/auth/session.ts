@@ -9,8 +9,8 @@ import { db } from '../db';
 import { session } from '../db/schema/session';
 import { getUserProjectPermissions } from '../utils/permissionUtils';
 
-const SESSION_REFRESH_INTERVAL_MS = 1000 * 60 * 60 * 24 * 15; // 15 days
-const SESSION_MAX_DURATION_MS = SESSION_REFRESH_INTERVAL_MS * 2; // 30 days
+const SESSION_REFRESH_INTERVAL_MS = 1000 * 60 * 60 * 24 * 1; // 1 days
+const SESSION_MAX_DURATION_MS = SESSION_REFRESH_INTERVAL_MS * 2; // 2 days
 
 export const generateRandomSessionToken = () => {
   const bytes = new Uint8Array(20);

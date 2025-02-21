@@ -101,12 +101,16 @@ interface ProjectKnowledgeProps {
     isPinned: boolean;
   }>;
   setIsAddResourceModalOpen: (open: boolean) => void;
+  canCreate: boolean;
+  canDelete: boolean;
 }
 
 export function ProjectKnowledge({
   projectId,
   resources,
   setIsAddResourceModalOpen,
+  canCreate,
+  canDelete,
 }: ProjectKnowledgeProps) {
   const queryClient = useQueryClient();
 
@@ -182,15 +186,16 @@ export function ProjectKnowledge({
       >
         <div className='flex items-center gap-8'>
           <h2 className='text-md font-semibold'>Project Resources</h2>
-
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={() => setIsAddResourceModalOpen(true)}
-          >
-            <Plus className='h-4 w-4' />
-          </Button>
-          {selectedResources.length > 0 && (
+          {canCreate && (
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => setIsAddResourceModalOpen(true)}
+            >
+              <Plus className='h-4 w-4' />
+            </Button>
+          )}
+          {selectedResources.length > 0 && canDelete && (
             <Button
               variant='destructive'
               size='sm'

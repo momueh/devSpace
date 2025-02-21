@@ -18,15 +18,12 @@ import { toast } from 'sonner';
 import { Task, TaskPriority, TaskSize, TaskStatus } from '@server/sharedTypes';
 import { BOARD_COLUMNS, TaskStatusDisplay } from '@/lib/helpers';
 import {
-  AlertCircle,
   Check,
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
   Clock,
   Edit,
-  Eye,
-  EyeOff,
   FileLock,
   ListOrdered,
   MessageSquare,
@@ -52,6 +49,10 @@ interface TaskDetailModalProps {
   projectMembers: any;
   onUpdate: (taskId: number, task: Partial<Task>) => Promise<void>;
   onDelete: (taskId: number) => Promise<void>;
+  canEdit: boolean;
+  canDelete: boolean;
+  canViewNote: boolean;
+  canCreateComment: boolean;
 }
 
 export function TaskDetailModal({
@@ -61,6 +62,10 @@ export function TaskDetailModal({
   projectMembers,
   onUpdate,
   onDelete,
+  canEdit,
+  canDelete,
+  canViewNote,
+  canCreateComment,
 }: TaskDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDevNotesOpen, setIsDevNotesOpen] = useState(false);
@@ -72,8 +77,6 @@ export function TaskDetailModal({
   const [size, setSize] = useState<TaskSize>(task.size);
   const [devNote, setDevNote] = useState(task.devNote || '');
   const [newNote, setNewNote] = useState('');
-
-  console.log('projectMembers', projectMembers);
 
   // Add these handlers
   const handleAddNote = async () => {
@@ -202,43 +205,44 @@ export function TaskDetailModal({
                 </div>
               )}
             </div>
-
-            <Collapsible
-              open={isDevNotesOpen}
-              onOpenChange={setIsDevNotesOpen}
-              className='border rounded-lg bg-muted/30 overflow-hidden'
-            >
-              <CollapsibleTrigger className='flex items-center justify-between w-full p-4 hover:bg-muted/50'>
-                <div className='flex items-center gap-2'>
-                  <FileLock className='h-6 w-6' />
-                  <h3 className='text-sm font-medium'>Private Notes</h3>
+            {canViewNote && (
+              <Collapsible
+                open={isDevNotesOpen}
+                onOpenChange={setIsDevNotesOpen}
+                className='border rounded-lg bg-muted/30 overflow-hidden'
+              >
+                <CollapsibleTrigger className='flex items-center justify-between w-full p-4 hover:bg-muted/50'>
                   <div className='flex items-center gap-2'>
-                    {task.author && (
-                      <Avatar className='h-6 w-6'>
-                        <AvatarImage src={task.author.avatarUrl} />
-                        <AvatarFallback>{task.author.name[0]}</AvatarFallback>
-                      </Avatar>
-                    )}
+                    <FileLock className='h-6 w-6' />
+                    <h3 className='text-sm font-medium'>Private Notes</h3>
+                    <div className='flex items-center gap-2'>
+                      {task.author && (
+                        <Avatar className='h-6 w-6'>
+                          <AvatarImage src={task.author.avatarUrl} />
+                          <AvatarFallback>{task.author.name[0]}</AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
                   </div>
-                </div>
-                {isDevNotesOpen ? (
-                  <ChevronUp className='h-4 w-4' />
-                ) : (
-                  <ChevronDown className='h-4 w-4' />
-                )}
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className='p-4 pt-0 space-y-4'>
-                  <Textarea
-                    value={devNote}
-                    onChange={(e) => setDevNote(e.target.value)}
-                    placeholder='You can write private notes here, that are only visible to you.'
-                    className='min-h-[100px] resize-none bg-background/50'
-                    disabled={!isEditing}
-                  />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  {isDevNotesOpen ? (
+                    <ChevronUp className='h-4 w-4' />
+                  ) : (
+                    <ChevronDown className='h-4 w-4' />
+                  )}
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className='p-4 pt-0 space-y-4'>
+                    <Textarea
+                      value={devNote}
+                      onChange={(e) => setDevNote(e.target.value)}
+                      placeholder='You can write private notes here, that are only visible to you.'
+                      className='min-h-[100px] resize-none bg-background/50'
+                      disabled={!isEditing}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
 
             <div className='space-y-4'>
               <div className='flex items-center gap-2'>
@@ -269,7 +273,8 @@ export function TaskDetailModal({
                       </div>
                       <p className='text-sm'>{comment.content}</p>
                     </div>
-                    {index < task.comments.length - 1 && (
+
+                    {canCreateComment && index < task.comments.length - 1 && (
                       <Button
                         variant='ghost'
                         size='sm'
@@ -280,29 +285,32 @@ export function TaskDetailModal({
                     )}
                   </React.Fragment>
                 ))}
-                {(!task.comments || task.comments.length === 0) && (
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className='w-full h-8 hover:bg-muted/50'
-                  >
-                    <Plus className='h-4 w-4' />
-                  </Button>
-                )}
+                {canCreateComment &&
+                  (!task.comments || task.comments.length === 0) && (
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      className='w-full h-8 hover:bg-muted/50'
+                    >
+                      <Plus className='h-4 w-4' />
+                    </Button>
+                  )}
               </div>
             </div>
           </div>
 
           <div className='space-y-6'>
-            <Button
-              variant='outline'
-              size='sm'
-              className='w-full justify-start'
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              <Edit className='mr-2 h-4 w-4' />
-              {isEditing ? 'Cancel Editing' : 'Edit Task'}
-            </Button>
+            {canEdit && (
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full justify-start'
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                <Edit className='mr-2 h-4 w-4' />
+                {isEditing ? 'Cancel Editing' : 'Edit Task Description'}
+              </Button>
+            )}
 
             <div className='space-y-4'>
               <div className='space-y-2'>
@@ -312,6 +320,7 @@ export function TaskDetailModal({
                 </div>
                 <div className='flex items-center gap-2'>
                   <Select
+                    disabled={canEdit}
                     value={task.assigneeId?.toString() || 'unassigned'}
                     onValueChange={(value) =>
                       onUpdate(task.id, {
@@ -346,6 +355,7 @@ export function TaskDetailModal({
                 <Select
                   value={status}
                   onValueChange={(value: TaskStatus) => setStatus(value)}
+                  disabled={canEdit}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Status' />
@@ -368,6 +378,7 @@ export function TaskDetailModal({
                 <Select
                   value={priority}
                   onValueChange={(value: TaskPriority) => setPriority(value)}
+                  disabled={canEdit}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Priority' />
@@ -389,6 +400,7 @@ export function TaskDetailModal({
                 <Select
                   value={size}
                   onValueChange={(value: TaskSize) => setSize(value)}
+                  disabled={canEdit}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Size' />
@@ -411,36 +423,41 @@ export function TaskDetailModal({
                   {new Date(task.createdAt).toLocaleDateString()}
                 </p>
               </div>
+              {canDelete && (
+                <>
+                  <Separator />
 
-              <Separator />
-
-              <Button
-                variant='destructive'
-                size='sm'
-                className='w-full justify-start'
-                onClick={handleDelete}
-              >
-                {isDeletingTask ? (
-                  <>
-                    <Check className='mr-2 h-4 w-4' />
-                    Confirm Delete
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className='mr-2 h-4 w-4' />
-                    Delete Task
-                  </>
-                )}
-              </Button>
+                  <Button
+                    variant='destructive'
+                    size='sm'
+                    className='w-full justify-start'
+                    onClick={handleDelete}
+                  >
+                    {isDeletingTask ? (
+                      <>
+                        <Check className='mr-2 h-4 w-4' />
+                        Confirm Delete
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className='mr-2 h-4 w-4' />
+                        Delete Task
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        <DialogFooter className='mt-6'>
-          <Button onClick={handleSave} disabled={!isEditing}>
-            Save Changes
-          </Button>
-        </DialogFooter>
+        {canEdit && (
+          <DialogFooter className='mt-6'>
+            <Button onClick={handleSave} disabled={!isEditing}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

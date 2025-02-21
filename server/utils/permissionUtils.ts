@@ -17,6 +17,10 @@ export const Permissions = {
   DELETE_TASK: 'delete_task',
   ASSIGN_TASK: 'assign_task',
 
+  // Resource Management
+  CREATE_RESOURCE: 'create_resource',
+  DELETE_RESOURCE: 'delete_resource',
+
   // Comments & Notes
   CREATE_COMMENT: 'create_comment',
   EDIT_COMMENT: 'edit_comment',

@@ -63,6 +63,9 @@ export interface ProjectPermissions {
   delete_task: boolean;
   assign_task: boolean;
 
+  create_resource: boolean;
+  delete_resource: boolean;
+
   create_comment: boolean;
   edit_comment: boolean;
   delete_comment: boolean;

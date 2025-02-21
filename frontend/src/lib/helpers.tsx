@@ -69,3 +69,10 @@ export const getVisibilityIcon = (visibility: ResourceVisibility) => {
 export const getInitials = (firstname: string, lastname: string) => {
   return `${firstname[0]}${lastname[0]}`.toUpperCase();
 };
+
+export const getUserProjectPermissions = (
+  projectPermissions: any,
+  projectId: number
+) => {
+  return projectPermissions[projectId];
+};
