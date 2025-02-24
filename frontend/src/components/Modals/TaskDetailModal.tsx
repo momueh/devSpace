@@ -27,13 +27,14 @@ import {
   FileLock,
   ListOrdered,
   MessageSquare,
+  Pencil,
   Plus,
   Tag,
   Trash2,
   User,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Collapsible,
@@ -41,6 +42,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 interface TaskDetailModalProps {
   isOpen: boolean;
@@ -75,11 +77,17 @@ export function TaskDetailModal({
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
   const [size, setSize] = useState<TaskSize>(task.size);
-  const [devNote, setDevNote] = useState(task.devNote || '');
+  const [isAddingNote, setIsAddingNote] = useState(false);
   const [newNote, setNewNote] = useState('');
+  const [newComment, setNewComment] = useState('');
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
+  const [editedNoteContent, setEditedNoteContent] = useState('');
+  const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null);
 
-  // Add these handlers
-  const handleAddNote = async () => {
+  console.log('task', task);
+
+  const handleCreateNote = async () => {
     if (!newNote.trim()) return;
 
     try {
@@ -91,17 +99,48 @@ export function TaskDetailModal({
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to add note');
+      if (!response.ok) throw new Error('Failed to create note');
 
-      queryClient.invalidateQueries(['project', task.projectId]);
+      await onUpdate(task.id, {}); // Refresh task data
       setNewNote('');
+      setIsAddingNote(false);
       toast.success('Note added successfully');
     } catch (error) {
       toast.error('Failed to add note');
     }
   };
 
+  const handleEditNote = async (noteId: number) => {
+    if (!editedNoteContent.trim()) return;
+
+    try {
+      const response = await fetch(`/api/task/${task.id}/notes/${noteId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: editedNoteContent,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update note');
+
+      await onUpdate(task.id, {}); // Refresh task data
+      setEditingNoteId(null);
+      setEditedNoteContent('');
+      toast.success('Note updated successfully');
+    } catch (error) {
+      toast.error('Failed to update note');
+    }
+  };
+
   const handleDeleteNote = async (noteId: number) => {
+    if (deletingNoteId !== noteId) {
+      setDeletingNoteId(noteId);
+      // Reset after 2 seconds if not confirmed
+      setTimeout(() => setDeletingNoteId(null), 2000);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/task/${task.id}/notes/${noteId}`, {
         method: 'DELETE',
@@ -109,23 +148,25 @@ export function TaskDetailModal({
 
       if (!response.ok) throw new Error('Failed to delete note');
 
-      queryClient.invalidateQueries(['project', task.projectId]);
+      await onUpdate(task.id, {}); // Refresh task data
+      setDeletingNoteId(null);
       toast.success('Note deleted successfully');
     } catch (error) {
       toast.error('Failed to delete note');
+      setDeletingNoteId(null);
     }
   };
 
   const handleSave = () => {
-    onUpdate({
+    onUpdate(task.id, {
       ...task,
       title,
       description,
       status,
       priority,
       devNote,
-      isDevNotePublic,
-      updatedAt: new Date().toISOString(),
+      //updated_at as timestamp
+      updatedAt: new Date().getTime(),
     });
     setIsEditing(false);
     toast({
@@ -149,6 +190,28 @@ export function TaskDetailModal({
   };
 
   const commentCount = task.comments?.length || 0;
+
+  const handleCreateComment = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      const response = await fetch(`/api/task/${task.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: newComment,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create comment');
+
+      await onUpdate(task.id, {}); // Trigger task refresh
+      setNewComment('');
+      toast.success('Comment added successfully');
+    } catch (error) {
+      toast.error('Failed to add comment');
+    }
+  };
 
   const editorStyles = {
     minHeight: '300px',
@@ -205,6 +268,7 @@ export function TaskDetailModal({
                 </div>
               )}
             </div>
+
             {canViewNote && (
               <Collapsible
                 open={isDevNotesOpen}
@@ -214,15 +278,7 @@ export function TaskDetailModal({
                 <CollapsibleTrigger className='flex items-center justify-between w-full p-4 hover:bg-muted/50'>
                   <div className='flex items-center gap-2'>
                     <FileLock className='h-6 w-6' />
-                    <h3 className='text-sm font-medium'>Private Notes</h3>
-                    <div className='flex items-center gap-2'>
-                      {task.author && (
-                        <Avatar className='h-6 w-6'>
-                          <AvatarImage src={task.author.avatarUrl} />
-                          <AvatarFallback>{task.author.name[0]}</AvatarFallback>
-                        </Avatar>
-                      )}
-                    </div>
+                    <h3 className='text-sm font-medium'>My Private Notes</h3>
                   </div>
                   {isDevNotesOpen ? (
                     <ChevronUp className='h-4 w-4' />
@@ -232,13 +288,112 @@ export function TaskDetailModal({
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className='p-4 pt-0 space-y-4'>
-                    <Textarea
-                      value={devNote}
-                      onChange={(e) => setDevNote(e.target.value)}
-                      placeholder='You can write private notes here, that are only visible to you.'
-                      className='min-h-[100px] resize-none bg-background/50'
-                      disabled={!isEditing}
-                    />
+                    {task.notes?.map((note) => (
+                      <div
+                        key={note.id}
+                        className='p-3 rounded-lg border bg-background/50'
+                      >
+                        <div className='flex items-center justify-between mb-2'>
+                          <div className='flex items-center gap-2'>
+                            <span className='text-xs text-muted-foreground'>
+                              {new Date(note.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          <div className='flex gap-1'>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='h-8 w-8 p-0'
+                              onClick={() => {
+                                setEditingNoteId(note.id);
+                                setEditedNoteContent(note.content);
+                              }}
+                            >
+                              <Pencil className='h-4 w-4' />
+                            </Button>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='h-8 w-8 p-0 text-destructive hover:text-destructive'
+                              onClick={() => handleDeleteNote(note.id)}
+                            >
+                              {deletingNoteId === note.id ? (
+                                <Check className='h-4 w-4' />
+                              ) : (
+                                <Trash2 className='h-4 w-4' />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        {editingNoteId === note.id ? (
+                          <div className='space-y-2'>
+                            <Textarea
+                              value={editedNoteContent}
+                              onChange={(e) =>
+                                setEditedNoteContent(e.target.value)
+                              }
+                              className='min-h-[100px] resize-none bg-background'
+                            />
+                            <div className='flex justify-end gap-2'>
+                              <Button
+                                variant='ghost'
+                                size='sm'
+                                onClick={() => {
+                                  setEditingNoteId(null);
+                                  setEditedNoteContent('');
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                size='sm'
+                                onClick={() => handleEditNote(note.id)}
+                              >
+                                Save
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className='text-sm'>{note.content}</p>
+                        )}
+                      </div>
+                    ))}
+
+                    {!isAddingNote ? (
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='w-full h-8 hover:bg-muted/50'
+                        onClick={() => setIsAddingNote(true)}
+                      >
+                        <Plus className='h-4 w-4' />
+                      </Button>
+                    ) : (
+                      <div className='space-y-2'>
+                        <Textarea
+                          value={newNote}
+                          onChange={(e) => setNewNote(e.target.value)}
+                          placeholder='Write a private note...'
+                          className='min-h-[100px] resize-none bg-background/50'
+                        />
+                        <div className='flex justify-end gap-2'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => {
+                              setIsAddingNote(false);
+                              setNewNote('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button size='sm' onClick={handleCreateNote}>
+                            Add Note
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -255,14 +410,12 @@ export function TaskDetailModal({
                 )}
               </div>
               <div className='space-y-4'>
-                {task.comments?.map((comment, index) => (
+                {task.comments?.map((comment) => (
                   <React.Fragment key={comment.id}>
                     <div className='p-4 rounded-lg border bg-card'>
                       <div className='flex items-center gap-2 mb-2'>
-                        <Avatar className='h-6 w-6'>
-                          <AvatarFallback>
-                            {comment.authorName[0]}
-                          </AvatarFallback>
+                        <Avatar className='h-8 w-8'>
+                          <AvatarFallback>MM</AvatarFallback>
                         </Avatar>
                         <span className='font-medium'>
                           {comment.authorName}
@@ -273,28 +426,53 @@ export function TaskDetailModal({
                       </div>
                       <p className='text-sm'>{comment.content}</p>
                     </div>
+                  </React.Fragment>
+                ))}
 
-                    {canCreateComment && index < task.comments.length - 1 && (
+                {/* Show add comment button if no comments exist or after last comment */}
+                {canCreateComment && !isAddingComment && (
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='w-full h-8 hover:bg-muted/50'
+                    onClick={() => setIsAddingComment(true)}
+                  >
+                    <Plus className='h-4 w-4' />
+                  </Button>
+                )}
+
+                {/* Show comment input form when isAddingComment is true */}
+                {isAddingComment && canCreateComment && (
+                  <div className='space-y-2'>
+                    <Textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder='Write a comment...'
+                      className='flex-1'
+                    />
+                    <div className='flex justify-end gap-2'>
                       <Button
                         variant='ghost'
                         size='sm'
-                        className='w-full h-8 hover:bg-muted/50'
+                        onClick={() => {
+                          setIsAddingComment(false);
+                          setNewComment('');
+                        }}
                       >
-                        <Plus className='h-4 w-4' />
+                        Cancel
                       </Button>
-                    )}
-                  </React.Fragment>
-                ))}
-                {canCreateComment &&
-                  (!task.comments || task.comments.length === 0) && (
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      className='w-full h-8 hover:bg-muted/50'
-                    >
-                      <Plus className='h-4 w-4' />
-                    </Button>
-                  )}
+                      <Button
+                        size='sm'
+                        onClick={async () => {
+                          await handleCreateComment();
+                          setIsAddingComment(false);
+                        }}
+                      >
+                        Post
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
