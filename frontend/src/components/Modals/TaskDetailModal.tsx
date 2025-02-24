@@ -158,19 +158,18 @@ export function TaskDetailModal({
 
   const handleSave = () => {
     onUpdate(task.id, {
-      ...task,
       title,
       description,
       status,
       priority,
-      //updated_at as timestamp
-      updatedAt: new Date().getTime(),
+      size,
+      updatedAt: new Date().toISOString(),
     });
     setIsEditing(false);
-    toast({
-      title: 'Task updated',
-      description: 'Your changes have been saved successfully.',
-    });
+    // toast({
+    //   title: 'Task updated',
+    //   description: 'Your changes have been saved successfully.',
+    // });
   };
 
   const handleDelete = () => {
@@ -215,6 +214,8 @@ export function TaskDetailModal({
     minHeight: '300px',
     width: '100%',
   } as const;
+
+  console.log('description', description);
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
@@ -496,7 +497,7 @@ export function TaskDetailModal({
                 </div>
                 <div className='flex items-center gap-2'>
                   <Select
-                    disabled={canEdit}
+                    disabled={!canEdit}
                     value={task.assigneeId?.toString() || 'unassigned'}
                     onValueChange={(value) =>
                       onUpdate(task.id, {
@@ -531,7 +532,7 @@ export function TaskDetailModal({
                 <Select
                   value={status}
                   onValueChange={(value: TaskStatus) => setStatus(value)}
-                  disabled={canEdit}
+                  disabled={!canEdit}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Status' />
@@ -554,7 +555,7 @@ export function TaskDetailModal({
                 <Select
                   value={priority}
                   onValueChange={(value: TaskPriority) => setPriority(value)}
-                  disabled={canEdit}
+                  disabled={!canEdit}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Priority' />
@@ -576,7 +577,7 @@ export function TaskDetailModal({
                 <Select
                   value={size}
                   onValueChange={(value: TaskSize) => setSize(value)}
-                  disabled={canEdit}
+                  disabled={!canEdit}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Size' />

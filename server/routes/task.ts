@@ -51,14 +51,30 @@ export const taskRoute = new Hono()
         return c.json({ error: 'Unauthorized' }, 403);
       }
 
+      // Validate user has permission to edit task
+      if (!(await checkPermission(user, 'edit_task', taskResult.projectId))) {
+        return c.json({ error: 'Unauthorized' }, 403);
+      }
+
+      // Update only allowed fields
+      const updateData = {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        size: data.size,
+        updatedAt: new Date(),
+      };
+
       const [updated] = await db
         .update(task)
-        .set(data)
+        .set(updateData)
         .where(eq(task.id, id))
         .returning();
 
       return c.json(updated);
     } catch (error) {
+      console.log(error);
       return c.json({ error: 'Failed to update task' }, 500);
     }
   })
