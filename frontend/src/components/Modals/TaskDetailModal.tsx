@@ -42,7 +42,6 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 
 interface TaskDetailModalProps {
   isOpen: boolean;
@@ -164,7 +163,6 @@ export function TaskDetailModal({
       description,
       status,
       priority,
-      devNote,
       //updated_at as timestamp
       updatedAt: new Date().getTime(),
     });

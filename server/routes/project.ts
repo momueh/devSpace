@@ -12,6 +12,7 @@ import {
   insertProjectResourceSchema,
   projectResource,
 } from '../db/schema/projectResource';
+import { checkPermission } from '../utils/permissionUtils';
 
 export const projectRoute = new Hono()
   .use('/*', requireAuth)
@@ -156,6 +157,10 @@ export const projectRoute = new Hono()
     const data = await c.req.json();
     const user = c.var.user;
 
+    if (!(await checkPermission(user, 'edit_project', id))) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
+
     try {
       // Check if user owns the project
       const projectResult = await db.query.project.findFirst({
@@ -183,6 +188,10 @@ export const projectRoute = new Hono()
     const id = Number(c.req.param('id'));
     const user = c.var.user;
 
+    if (!(await checkPermission(user, 'delete_project', id))) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
+
     try {
       // Check if user owns the project
       const projectResult = await db.query.project.findFirst({
@@ -205,6 +214,10 @@ export const projectRoute = new Hono()
     const projectId = Number(c.req.param('id'));
     const { email, roleName } = await c.req.json();
     const currentUser = c.var.user;
+
+    if (!(await checkPermission(currentUser, 'invite_to_project', projectId))) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
 
     try {
       // Check if user is project owner
@@ -294,6 +307,11 @@ export const projectRoute = new Hono()
   .post('/:id/resources', async (c) => {
     const projectId = Number(c.req.param('id'));
     const data = await c.req.json();
+    const user = c.var.user;
+
+    if (!(await checkPermission(user, 'create_resource', projectId))) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
 
     try {
       const validatedData = insertProjectResourceSchema.parse({
@@ -316,6 +334,11 @@ export const projectRoute = new Hono()
   .delete('/:projectId/resource/:resourceId', async (c) => {
     const projectId = Number(c.req.param('projectId'));
     const resourceId = Number(c.req.param('resourceId'));
+    const user = c.var.user;
+
+    if (!(await checkPermission(user, 'delete_resource', projectId))) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
 
     try {
       const resource = await db.query.projectResource.findFirst({

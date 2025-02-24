@@ -1,7 +1,7 @@
 import { db } from '../db';
 import { and, eq } from 'drizzle-orm';
 import { projectMember } from '../db/schema/projectMember';
-import { type ProjectPermissions } from '../sharedTypes';
+import { type Permission, type ProjectPermissions } from '../sharedTypes';
 
 // Define known permissions as constants
 export const Permissions = {
@@ -93,4 +93,16 @@ export async function getUserProjectPermissions(
   }
 
   return projectPermissions;
+}
+
+export async function checkPermission(
+  user: any,
+  permission: Permission,
+  projectId: number
+): Promise<boolean> {
+  const permissions = user.projectPermissions[projectId] as Record<
+    Permission,
+    boolean
+  >;
+  return !!permissions?.[permission];
 }

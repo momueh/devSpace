@@ -8,6 +8,7 @@ import { requireAuth } from '../auth/middleware';
 import { sendEmail } from '../email';
 import { comment, insertCommentSchema } from '../db/schema/comment';
 import { insertNoteSchema, note } from '../db/schema/note';
+import { checkPermission } from '../utils/permissionUtils';
 
 export const taskRoute = new Hono()
   .use('/*', requireAuth)
@@ -15,6 +16,10 @@ export const taskRoute = new Hono()
   .post('/', async (c) => {
     const data = await c.req.json();
     const user = c.var.user;
+
+    if (!(await checkPermission(user, 'create_task', data.projectId))) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
 
     try {
       const validatedData = insertTaskSchema.parse(data);
